@@ -1,16 +1,16 @@
 import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 
 class LocationServices{
-  static Location location = Location();
+  Location location = Location();
 
   LocationServices(){
     location.enableBackgroundMode(enable: true);
+    location.changeSettings(accuracy: LocationAccuracy.high);
   }
 
-  static Future<void> getLocationPermission() async {
+  Future<void> getLocationPermission() async {
     bool _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -22,12 +22,12 @@ class LocationServices{
     }
   }
 
-  static Future<LocationData> getCurrentLocation() async {
+  Future<LocationData> getCurrentLocation() async {
     LocationData _locationData = await location.getLocation();
     return _locationData;
   }
 
-  static StreamSubscription<LocationData> getLocationStream(){
+  StreamSubscription<LocationData> getLocationStream(){
     StreamSubscription<LocationData> locationData = location.onLocationChanged.listen((LocationData currentLocation){});
     return locationData;
   }

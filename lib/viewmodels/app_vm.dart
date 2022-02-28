@@ -3,15 +3,20 @@ import 'package:location/location.dart';
 import 'package:rider/services/location_services.dart';
 
 class AppViewModel extends ChangeNotifier{
+
+  static AppViewModel? _instance;
+
+  AppViewModel._();
+
+  static AppViewModel get instance => _instance ??= AppViewModel._();
+
   bool? _locationEnabled;
 
   late bool _loading = false;
 
   late LocationData _currentLocation;
 
-  AppViewModel(){
-
-  }
+  AppViewModel();
 
   bool? get locationEnabled => _locationEnabled;
 
@@ -26,6 +31,7 @@ class AppViewModel extends ChangeNotifier{
 
   void setLocation(LocationData newLocation){
     _currentLocation = newLocation;
+    notifyListeners();
   }
 
   /*void getPermission() async {
@@ -33,13 +39,12 @@ class AppViewModel extends ChangeNotifier{
   }*/
 
   Future<void> getCurrentLocation() async{
-    setLoading(true);
-    setLocation(await LocationServices.getCurrentLocation());
-    setLoading(false);
+    setLocation(await LocationServices().getCurrentLocation());
+    notifyListeners();
   }
 
   void getLocationUpdates(){
-    LocationServices.getLocationStream().onData((LocationData data) {
+    LocationServices().getLocationStream().onData((LocationData data) {
       setLocation(data);
       notifyListeners();
     });

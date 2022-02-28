@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:rider/components/function_icons.dart';
 import 'package:rider/viewmodels/app_vm.dart';
+import 'package:rider/viewmodels/user_vm.dart';
 
-class HomeView extends StatelessWidget {
-  HomeView({Key? key}) : super(key: key);
+import '../speed_widget.dart';
+import '../viewmodels/app_vm.dart';
+import 'auth_view.dart';
 
-  final TextEditingController odometerController = TextEditingController();
+class HomeView extends StatefulWidget {
+  const HomeView({Key? key}) : super(key: key);
 
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
   final TextEditingController remarksController = TextEditingController();
 
   @override
@@ -25,20 +34,47 @@ class HomeView extends StatelessWidget {
         centerTitle: true,
         titleSpacing: 5,
         actions: [
-          IconButton(
-              onPressed: () {},
+          Consumer<UserViewModel>(builder: (context, signOut, child) {
+            return IconButton(
+              onPressed: () async {
+                await signOut.signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AuthView(),
+                  ),
+                );
+              },
               icon: const Icon(
                 Icons.power_settings_new,
                 color: Colors.red,
-              )),
+              ),
+            );
+          }),
         ],
       ),
       body: Consumer<AppViewModel>(builder: (context, appViewModel, child) {
-        print(appViewModel.currentLocation.speed);
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            /*Speedometer(
+              size: 300,
+              minValue: 0,
+              maxValue: 180,
+              currentValue: (appViewModel.currentLocation.speed ?? 0) ~/ 1000,
+              warningValue: 90,
+              //backgroundColor: Colors.black,
+              meterColor: Colors.green,
+              warningColor: Colors.orange,
+              kimColor: Colors.red,
+              displayNumericStyle: const TextStyle(
+                  fontFamily: 'Digital-Display',
+                  color: Colors.black,
+                  fontSize: 40),
+              displayText: 'km/h',
+              displayTextStyle: const TextStyle(color: Colors.black, fontSize: 15),
+            ),*/
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -186,7 +222,9 @@ class HomeView extends StatelessWidget {
               onPressed: () {
                 appViewModel.getLocationUpdates();
               },
-              style: OutlinedButton.styleFrom(minimumSize: Size(200, 50), side: BorderSide(color: Colors.green)),
+              style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(200, 50),
+                  side: const BorderSide(color: Colors.green)),
               child: const Text(
                 'START TRIP',
                 style: TextStyle(
@@ -195,6 +233,10 @@ class HomeView extends StatelessWidget {
                   color: Colors.green,
                 ),
               ),
+            ),
+            CustomAnimatedIcon(
+              iconSrc: '',
+              press: () {},
             ),
           ],
         );

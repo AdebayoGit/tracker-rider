@@ -1,17 +1,22 @@
 class Success {
-  int code;
+  String code;
   Object response;
-  Success({this.code = 200, required this.response});
+  Success({this.code = '200', required this.response});
 }
 
 class Failure {
-  int code;
+  String code;
   Object errorResponse;
   Failure({required this.code, required this.errorResponse});
+
+  @override
+  String toString(){
+    return "Error: $code \n$errorResponse";
+  }
 }
 
 class Error{
-  int code;
+  String code;
   Object message;
   Error({required this.code, required this.message});
 }
