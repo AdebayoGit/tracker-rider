@@ -1,8 +1,3 @@
-import 'dart:math';
-
-import 'package:animated_icon/animate_icon.dart';
-import 'package:animated_icon/animate_icons.dart';
-import 'package:animated_icon/animate_icons.dart';
 import 'package:flutter/material.dart';
 
 class CustomAnimatedIcon extends StatefulWidget {
@@ -55,6 +50,7 @@ class _CustomAnimatedIconState extends State<CustomAnimatedIcon>
   }
 
   void _handleOnPressed() {
+    widget.press;
     setState(() {
       isPlaying = !isPlaying;
       isPlaying

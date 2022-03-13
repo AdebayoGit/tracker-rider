@@ -37,21 +37,21 @@ dependencies:
   cloud_firestore: ^3.1.7
   firebase_auth: ^3.3.6
   firebase_core: ^1.12.0
-  background_locator: ^1.6.12
-  animated_text_kit: ^4.2.1
+  firebase_storage: ^10.2.9
+  # background_locator: ^1.6.12
   fluttertoast: ^8.0.8
   google_fonts: ^2.3.1
   provider: ^6.0.2
   location: ^4.3.0
   path_provider: ^2.0.9
-  flutter_webrtc: ^0.8.2
   shared_preferences: ^2.0.13
-  camera: ^0.9.4+12
-  video_player: ^2.1.4
-  gallery_saver: ^2.3.2
+  # camera: ^0.9.4+12
+  # gallery_saver: ^2.3.2
   password: ^1.0.0
   animations: ^2.0.2
   animated_icon: ^0.0.2
+  hive: ^2.0.6
+  hive_flutter: ^1.1.0
 
 
 dev_dependencies:
@@ -64,6 +64,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^1.0.0
+  hive_generator: ^1.1.2
+  build_runner: ^2.1.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

@@ -14,11 +14,9 @@ class FileManager {
   }
 
   static Future<File> _getTempLogFile() async {
-    final directory = await getTemporaryDirectory();
-    final file = File('${directory.path}/log.txt');
-    if (!await file.exists()) {
-      await file.writeAsString('');
-    }
+
+    final directory = (await getExternalStorageDirectory())!.path;
+    final file = File('$directory/log.txt');
     return file;
   }
 

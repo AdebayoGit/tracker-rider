@@ -6,10 +6,8 @@ import 'package:rider/views/auth_view.dart';
 import '../models/rider.dart';
 import '../models/status.dart';
 import '../services/device_services.dart';
-import '../views/home.dart';
 import '../views/register_device_view.dart';
 import '../views/splash_view.dart';
-import 'app_vm.dart';
 
 class UserViewModel extends ChangeNotifier {
   Rider? _rider;
@@ -36,7 +34,7 @@ class UserViewModel extends ChangeNotifier {
 
   Error? get error => _error;
 
-  UserViewModel() {}
+  UserViewModel();
 
   setLoading(bool loading) {
     this.loading = loading;
@@ -47,7 +45,6 @@ class UserViewModel extends ChangeNotifier {
     var response = await AuthServices().signIn(username, password);
     if (response is Success) {
       rider = response.response as Rider;
-      await AppViewModel.instance.getCurrentLocation();
     } else if (response is Failure) {
       return Error(code: response.code, message: response.errorResponse);
     }

@@ -4,9 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:rider/components/auth_components.dart';
 import 'package:rider/services/validator.dart';
-import 'package:rider/viewmodels/user_vm.dart';
+import 'package:rider/providers/user_vm.dart';
 import 'package:rider/views/register_device_view.dart';
 import 'package:rider/models/status.dart';
+import '../providers/location_vm.dart';
 import 'home.dart';
 
 class AuthView extends StatefulWidget {
@@ -18,6 +19,14 @@ class AuthView extends StatefulWidget {
 
 class _AuthViewState extends State<AuthView> {
   late Size _size;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance?.addPostFrameCallback((_) =>
+        Provider.of<LocationViewModel>(context, listen: false)
+            .getLocationUpdates());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -247,11 +256,12 @@ class _SignInState extends State<SignIn> {
         Fluttertoast.showToast(msg: response.message as String);
       } else {
         Navigator.pop(context);
-        Navigator.pushReplacement(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder: (context) => const HomeView(),
           ),
+          (_) => false,
         );
       }
     } else {
