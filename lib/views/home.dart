@@ -37,9 +37,11 @@ class _HomeViewState extends State<HomeView> {
 
   int _counter = 0;
 
+  final Stopwatch _stopwatch = Stopwatch();
+
   late Timer _timer;
 
-  int day = 0, hourTenth = 0, hourUnit = 0, minuteTenth = 0, minuteUnit = 0, secondTenth = 0, secondUnit = 0;
+  String days = '0', hours = '00', minutes = '00', seconds = '00';
 
   /*@override
   void initState() {
@@ -106,34 +108,25 @@ class _HomeViewState extends State<HomeView> {
                       ),
                       children: <TextSpan>[
                         TextSpan(
-                          text: '$day',
+                          text: days,
                         ),
                         const TextSpan(
                           text: ':',
                         ),
                         TextSpan(
-                          text: '$hourTenth',
-                        ),
-                        TextSpan(
-                          text: '$hourUnit',
+                          text: hours,
                         ),
                         const TextSpan(
                           text: ':',
                         ),
                         TextSpan(
-                          text: '$minuteTenth',
-                        ),
-                        TextSpan(
-                          text: '$minuteUnit',
+                          text: minutes,
                         ),
                         const TextSpan(
                           text: ':',
                         ),
                         TextSpan(
-                          text: '$secondTenth',
-                        ),
-                        TextSpan(
-                          text: '$secondUnit',
+                          text: seconds,
                         ),
                       ]),
                 ),
@@ -182,6 +175,7 @@ class _HomeViewState extends State<HomeView> {
 
   void _pauseTrip() {
     Provider.of<LocationViewModel>(context, listen: false).pauseTrip();
+    _stopwatch.stop();
     _timer.cancel();
   }
 
@@ -192,16 +186,15 @@ class _HomeViewState extends State<HomeView> {
 
   void _startTimer() {
     //Todo: Change to stopwatch instead
+    _stopwatch.start();
     setState(() {
       _timer = Timer.periodic(
         const Duration(seconds: 1),
         (timer) {
-          _counter++;
-          _duration = Duration(seconds: _counter);
-          minuteTenth = ((_duration.inMinutes) / 10).floor();
-          minuteUnit = ((_duration.inMinutes) % 10).round();
-          secondTenth = ((_duration.inSeconds % 60) / 10).floor();
-          secondUnit = ((_duration.inSeconds % 60) % 10).round();
+          seconds = _stopwatch.elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
+          minutes = _stopwatch.elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
+          hours = _stopwatch.elapsed.inHours.remainder(24).toString().padLeft(2, '0');
+          days = _stopwatch.elapsed.inDays.toString().padLeft(1, '0');
         },
       );
     });
@@ -209,19 +202,14 @@ class _HomeViewState extends State<HomeView> {
 
   void _stopTrip() {
     Provider.of<LocationViewModel>(context, listen: false).stopTrip(null);
-    _resetTimer();
-  }
-
-  _resetTimer() {
     setState(() {
-      _counter = 0;
-      day = 0;
-      hourTenth = 0;
-      hourUnit = 0;
-      minuteTenth = 0;
-      minuteUnit = 0;
-      secondTenth = 0;
-      secondUnit = 0;
+      _stopwatch.reset();
+      _stopwatch.stop();
+      days = '0';
+      hours = '00';
+      minutes = '00';
+      seconds = '00';
+      _timer.cancel();
     });
   }
 
