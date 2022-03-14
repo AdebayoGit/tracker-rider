@@ -101,6 +101,12 @@ flutter:
     - family: Canterbury
       fonts:
         - asset: assets/fonts/Canterbury.ttf
+    - family: DIGITAL-7
+      fonts:
+        - asset: assets/fonts/digital-7.ttf
+        - asset: assets/fonts/digital-7 (italic).ttf
+        - asset: assets/fonts/digital-7 (mono).ttf
+        - asset: assets/fonts/digital-7 (mono italic).ttf
   # fonts:
   #   - family: Schyler
   #     fonts:

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -9,11 +8,6 @@ import 'package:rider/providers/location_vm.dart';
 import 'package:rider/providers/user_vm.dart';
 import 'package:rider/size_config.dart';
 
-import '../components/comments_dialog.dart';
-import '../components/timer_components/minutesTenth.dart';
-import '../components/timer_components/minutesUnit.dart';
-import '../components/timer_components/secondsTenth.dart';
-import '../components/timer_components/secondsUnit.dart';
 import '../providers/location_vm.dart';
 import 'auth_view.dart';
 
@@ -24,30 +18,37 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView>
-    with SingleTickerProviderStateMixin {
-  final TextEditingController remarks = TextEditingController();
+class _HomeViewState extends State<HomeView> {
   /*late final CameraServices camService;
+  CameraController? controller;
+  late AnimationController _animationController;*/
 
-  CameraController? controller;*/
-
-  late AnimationController _animationController;
+  final TextEditingController remarks = TextEditingController();
 
   late Widget currentWidget = playWidget();
 
   bool isPlaying = false;
+
   Color accentColor = Colors.greenAccent;
 
   final Size _size = SizeConfig.size;
 
-  @override
+  Duration _duration = const Duration(seconds: (1));
+
+  int _counter = 0;
+
+  late Timer _timer;
+
+  int day = 0, hourTenth = 0, hourUnit = 0, minuteTenth = 0, minuteUnit = 0, secondTenth = 0, secondUnit = 0;
+
+  /*@override
   void initState() {
     _animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
-    /*camService = CameraServices(controller);
-    camService.getAvailableCameras();*/
+    camService = CameraServices(controller);
+    camService.getAvailableCameras();
     super.initState();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +60,7 @@ class _HomeViewState extends State<HomeView>
             setState(() {
               currentWidget = playWidget();
               isPlaying = false;
+              _stopTrip();
             });
           },
           backgroundColor: Colors.black45,
@@ -72,6 +74,7 @@ class _HomeViewState extends State<HomeView>
             fit: StackFit.expand,
             children: [
               Column(
+                //mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   PageTransitionSwitcher(
                     transitionBuilder: (
@@ -87,8 +90,53 @@ class _HomeViewState extends State<HomeView>
                     },
                     child: currentWidget,
                   ),
-                  MyHomePage(),
                 ],
+              ),
+              Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                      style: const TextStyle(
+                        fontSize: 60,
+                        fontFamily: 'DIGITAL-7',
+                        color: Colors.black,
+                      ),
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: '$day',
+                        ),
+                        const TextSpan(
+                          text: ':',
+                        ),
+                        TextSpan(
+                          text: '$hourTenth',
+                        ),
+                        TextSpan(
+                          text: '$hourUnit',
+                        ),
+                        const TextSpan(
+                          text: ':',
+                        ),
+                        TextSpan(
+                          text: '$minuteTenth',
+                        ),
+                        TextSpan(
+                          text: '$minuteUnit',
+                        ),
+                        const TextSpan(
+                          text: ':',
+                        ),
+                        TextSpan(
+                          text: '$secondTenth',
+                        ),
+                        TextSpan(
+                          text: '$secondUnit',
+                        ),
+                      ]),
+                ),
               ),
               Positioned(
                 top: 0,
@@ -132,21 +180,49 @@ class _HomeViewState extends State<HomeView>
     );
   }
 
-  void _handleOnPressed() async {
-    setState(() {
-      isPlaying = !isPlaying;
-      isPlaying ? _startTrip() : _pauseTrip();
-    });
-  }
-
   void _pauseTrip() {
     Provider.of<LocationViewModel>(context, listen: false).pauseTrip();
-    _animationController.reverse();
+    _timer.cancel();
   }
 
   void _startTrip() {
-    _animationController.forward();
     Provider.of<LocationViewModel>(context, listen: false).startTrip();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    //Todo: Change to stopwatch instead
+    setState(() {
+      _timer = Timer.periodic(
+        const Duration(seconds: 1),
+        (timer) {
+          _counter++;
+          _duration = Duration(seconds: _counter);
+          minuteTenth = ((_duration.inMinutes) / 10).floor();
+          minuteUnit = ((_duration.inMinutes) % 10).round();
+          secondTenth = ((_duration.inSeconds % 60) / 10).floor();
+          secondUnit = ((_duration.inSeconds % 60) % 10).round();
+        },
+      );
+    });
+  }
+
+  void _stopTrip() {
+    Provider.of<LocationViewModel>(context, listen: false).stopTrip(null);
+    _resetTimer();
+  }
+
+  _resetTimer() {
+    setState(() {
+      _counter = 0;
+      day = 0;
+      hourTenth = 0;
+      hourUnit = 0;
+      minuteTenth = 0;
+      minuteUnit = 0;
+      secondTenth = 0;
+      secondUnit = 0;
+    });
   }
 
   /*Column(
@@ -370,6 +446,7 @@ isPlaying = false;
                 setState(() {
                   currentWidget = pauseWidget();
                   isPlaying = true;
+                  _startTrip();
                 });
                 /*await showModalBottomSheet(
               isScrollControlled: true,
@@ -458,6 +535,7 @@ isPlaying = false;
             child: IconButton(
               onPressed: () async {
                 setState(() {
+                  _pauseTrip();
                   currentWidget = resumeWidget();
                 });
                 /*await showModalBottomSheet(
@@ -548,6 +626,7 @@ isPlaying = false;
               onPressed: () async {
                 setState(() {
                   currentWidget = pauseWidget();
+                  _startTrip();
                 });
                 /*await showModalBottomSheet(
               isScrollControlled: true,
@@ -586,113 +665,4 @@ isPlaying = false;
           ),
         ],
       );
-}
-
-
-
-class MyHomePage extends StatefulWidget {
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  Duration _duration = new Duration(seconds: (10));
-
-  int _counter = 4200;
-  late Timer _timer;
-  int minuteTenth = 0, minuteUnit = 0, secondTenth = 0, secondUnit = 0;
-
-  String showtime = "120 Seconds Countdown";
-  bool _isbuttondisabled = false;
-  void startTimer() {
-    _counter = (4200);
-
-    _timer = Timer.periodic(
-      Duration(seconds: 1),
-          (timer) {
-        if (_counter > 0) {
-          setState(() {
-            _isbuttondisabled = true;
-            _counter--;
-            _duration = new Duration(seconds: _counter);
-            showtime = "${_duration.inMinutes}:${_duration.inSeconds % 60}";
-            print(showtime);
-            minuteTenth = ((_duration.inMinutes) / 10).floor();
-            minuteUnit = ((_duration.inMinutes) % 10).round();
-            secondTenth = ((_duration.inSeconds % 60) / 10).floor();
-            secondUnit = ((_duration.inSeconds % 60) % 10).round();
-          });
-        } else {
-          _timer.cancel();
-          setState(() {
-            _isbuttondisabled = false;
-          });
-        }
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(child: MyMinuteUnit(minuteTenth)),
-                Expanded(child: MyMinuteUnit(minuteUnit)),
-                const SizedBox(
-                  height: 150,
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Text(
-                      ":",
-                      style: TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(child: MyMinuteUnit(secondTenth)),
-                Expanded(child: MyMinuteUnit(secondUnit)),
-              ],
-            ),
-          ),
-          Container(
-            width: double.infinity,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RaisedButton(
-                  elevation: 10,
-                  onPressed: _isbuttondisabled == false ? startTimer : null,
-                  child: Text("Start Timer"),
-                ),
-                RaisedButton(
-                  elevation: 10,
-                  onPressed: _isbuttondisabled == true ? setcounterZero : null,
-                  child: Text("Stop Timer"),
-                ),
-              ],
-            ),
-          ),
-        ],
-      );
-  }
-
-  setcounterZero() {
-    setState(() {
-      _counter = 0;
-    });
-    minuteTenth = 0;
-    minuteUnit = 0;
-    secondTenth = 0;
-    secondUnit = 0;
-  }
 }
