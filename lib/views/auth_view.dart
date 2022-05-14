@@ -1,40 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:rider/components/auth_components.dart';
-import 'package:rider/services/validator.dart';
-import 'package:rider/providers/user_vm.dart';
+import 'package:rider/controllers/auth_controller.dart';
 import 'package:rider/views/register_device_view.dart';
-import 'package:rider/models/status.dart';
-import '../providers/location_vm.dart';
-import 'home.dart';
+import '../utils/validator.dart';
 
-class AuthView extends StatefulWidget {
+class AuthView extends StatelessWidget {
   const AuthView({Key? key}) : super(key: key);
 
   @override
-  State<AuthView> createState() => _AuthViewState();
-}
-
-class _AuthViewState extends State<AuthView> {
-  late Size _size;
-
-  @override
-  void initState() {
-    WidgetsBinding.instance?.addPostFrameCallback((_) =>
-        Provider.of<LocationViewModel>(context, listen: false)
-            .getLocationUpdates());
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    _size = MediaQuery.of(context).size;
     return Scaffold(
       body: Container(
         width: double.infinity,
-        height: _size.height,
+        height: Get.height,
         decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
@@ -50,12 +30,13 @@ class _AuthViewState extends State<AuthView> {
             children: [
               Padding(
                 padding: EdgeInsets.only(
-                    left: _size.width * 0.05,
-                    right: _size.width * 0.3,
-                    top: _size.height * 0.1),
+                    left: Get.width * 0.05,
+                    right: Get.width * 0.3,
+                    top: Get.height * 0.1),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    /// Title text
                     FittedBox(
                       child: Text(
                         'PASSENGER',
@@ -68,6 +49,7 @@ class _AuthViewState extends State<AuthView> {
                                     fontWeight: FontWeight.bold)),
                       ),
                     ),
+                    /// Subtitle Text
                     FittedBox(
                       child: Text(
                         'TRIP MONITOR',
@@ -78,6 +60,7 @@ class _AuthViewState extends State<AuthView> {
                                 .copyWith(color: Colors.black)),
                       ),
                     ),
+                    /// Body Text
                     Text(
                       '''Monitoring trips has never been easier with the passenger app you can share your trip routes without doing too much...''',
                       textAlign: TextAlign.justify,
@@ -87,6 +70,7 @@ class _AuthViewState extends State<AuthView> {
                               .subtitle1!
                               .copyWith(color: Colors.black)),
                     ),
+                    /// Proceed Button
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -109,14 +93,8 @@ class _AuthViewState extends State<AuthView> {
                             elevation: 5,
                             margin: EdgeInsets.zero,
                             child: GestureDetector(
-                              onTap: () async {
-                                showModalBottomSheet(
-                                  isScrollControlled: true,
-                                  context: context,
-                                  builder: (context) {
-                                    return const SignIn();
-                                  },
-                                );
+                              onTap: () {
+                                Get.bottomSheet(SignIn(), backgroundColor: Colors.white);
                               },
                               child: Image.asset(
                                 'assets/images/auth_button.png',
@@ -129,6 +107,7 @@ class _AuthViewState extends State<AuthView> {
                   ],
                 ),
               ),
+              /// Register Truck Button
               Positioned(
                 top: 0,
                 right: 0,
@@ -141,10 +120,23 @@ class _AuthViewState extends State<AuthView> {
                       ),
                     );
                   },
+                  style: TextButton.styleFrom(
+                    textStyle: TextStyle(
+                      color: Colors.grey[900],
+                    ),
+                  ),
                   child: Row(
-                    children: const [
-                      Text('Register Truck'),
-                      Icon(Icons.local_shipping)
+                    children: <Widget>[
+                      Text(
+                        'Register Truck',
+                        style: TextStyle(
+                          color: Colors.grey[900],
+                        ),
+                      ),
+                      Icon(
+                        Icons.local_shipping,
+                        color: Colors.grey[900],
+                      )
                     ],
                   ),
                 ),
@@ -157,15 +149,8 @@ class _AuthViewState extends State<AuthView> {
   }
 }
 
-class SignIn extends StatefulWidget {
-  const SignIn({Key? key}) : super(key: key);
-
-  @override
-  State<SignIn> createState() => _SignInState();
-}
-
-class _SignInState extends State<SignIn> {
-  bool _loading = false;
+class SignIn extends GetResponsiveView<AuthController> {
+  SignIn({Key? key}) : super(key: key);
 
   final TextEditingController _username = TextEditingController();
 
@@ -173,8 +158,6 @@ class _SignInState extends State<SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    Size _size = MediaQuery.of(context).size;
-
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -191,10 +174,19 @@ class _SignInState extends State<SignIn> {
               child: TextFormField(
                 controller: _username,
                 keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                    label: Text('Username'),
+                decoration: InputDecoration(
+                    label: Text(
+                        'Username',
+                      style: TextStyle(
+                        color: Colors.grey[900],
+                      ),
+                    ),
                     hintText: 'TruckMan',
-                    prefixIcon: Icon(Icons.person)),
+                    prefixIcon: Icon(Icons.person, color: Colors.grey[900],),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[900]!)
+                  ),
+                ),
               ),
             ),
             Padding(
@@ -207,16 +199,16 @@ class _SignInState extends State<SignIn> {
             Container(
               margin: const EdgeInsets.symmetric(vertical: 20),
               alignment: Alignment.center,
-              child: !_loading
-                  ? ElevatedButton(
+              child: ElevatedButton(
                       onPressed: () {
-                        signIn();
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        controller.signIn(_username.text, _password.text);
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25)),
-                        maximumSize: Size(_size.width * 0.8, 50),
-                        primary: Colors.grey,
+                        maximumSize: Size(Get.width * 0.8, 50),
+                        primary: Colors.grey[900],
                         textStyle: const TextStyle(
                           color: Colors.white,
                         ),
@@ -234,174 +226,11 @@ class _SignInState extends State<SignIn> {
                           ),
                         ),
                       ),
-                    )
-                  : const CircularProgressIndicator(),
+                    ),
             ),
           ],
         ),
       ),
     );
   }
-
-  signIn() async {
-    FocusManager.instance.primaryFocus?.unfocus();
-    setState(() {
-      _loading = true;
-    });
-    if (_username.text.isNotEmpty & _password.text.isNotEmpty) {
-      Object response = await Provider.of<UserViewModel>(context, listen: false)
-          .signIn(_username.text, _password.text);
-      if (response is Error) {
-        Navigator.pop(context);
-        Fluttertoast.showToast(msg: response.message as String);
-      } else {
-        Navigator.pop(context);
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeView(),
-          ),
-          (_) => false,
-        );
-      }
-    } else {
-      Fluttertoast.showToast(msg: 'Please fill all field correctly!');
-    }
-    setState(() {
-      _loading = false;
-    });
-  }
 }
-
-/*class SignUp extends StatefulWidget {
-  const SignUp({Key? key}) : super(key: key);
-
-  @override
-  State<SignUp> createState() => _SignUpState();
-}
-
-class _SignUpState extends State<SignUp> {
-  final TextEditingController name = TextEditingController();
-
-  final TextEditingController username = TextEditingController();
-
-  final TextEditingController password = TextEditingController();
-
-  final TextEditingController confirmPassword = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    Size _size = MediaQuery.of(context).size;
-
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        Container(
-          color: Colors.black,
-          child: ConstrainedBox(
-            child: Image.asset('./assets/images/truck_cartoon.png',
-                fit: BoxFit.contain),
-            constraints: const BoxConstraints(
-              maxHeight: 180,
-              minWidth: double.infinity,
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: TextFormField(
-            controller: name,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-                label: Text('Full Name'),
-                hintText: 'John Doe',
-                prefixIcon: Icon(Icons.person)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: TextFormField(
-            controller: username,
-            keyboardType: TextInputType.text,
-            decoration: const InputDecoration(
-                label: Text('Username'),
-                hintText: 'TruckMan',
-                prefixIcon: Icon(Icons.account_circle)),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: PassTextField(
-              validator: Validator.passwordValidator,
-              controller: password,
-              field: 'Password',
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30.0),
-          child: PassTextField(
-              validator: Validator.passwordValidator,
-              controller: confirmPassword,
-              field: 'Confirm Password'),
-        ),
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 20),
-          alignment: Alignment.center,
-          child: ElevatedButton(
-            onPressed: () async {
-              if (name.text.isNotEmpty & username.text.isNotEmpty & password.text.isNotEmpty) {
-                Object response = await Provider.of<UserViewModel>(context, listen: false)
-                    .signUp(name.text, username.text, password.text);
-                if (response is Error) {
-                  ScaffoldMessenger.of(context).showMaterialBanner(
-                      MaterialBanner(
-                      content: const Text(
-                          'Unable to complete registration, please try again!'),
-                      actions: [
-                        IconButton(
-                            onPressed: () {
-                              ScaffoldMessenger.of(context)
-                                  .clearMaterialBanners();
-                            },
-                            icon: const Icon(Icons.clear, color: Colors.red))
-                      ]));
-                } else {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomeView(),
-                    ),
-                  );
-                }
-              } else {
-                Fluttertoast.showToast(
-                    msg: 'Please fill all field correctly!');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25)),
-              maximumSize: Size(_size.width * 0.8, 50),
-              primary: Colors.grey,
-              textStyle: const TextStyle(
-                color: Colors.white,
-              ),
-            ),
-            child: const SizedBox(
-              height: 50,
-              child: Center(
-                child: Text(
-                  'Proceed',
-                  style: TextStyle(
-                      fontSize: 20,
-                      letterSpacing: 3,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}*/

@@ -1,33 +1,29 @@
-import 'dart:async';
-
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import 'package:rider/providers/location_vm.dart';
-import 'package:rider/providers/user_vm.dart';
-import 'package:rider/size_config.dart';
+import 'package:get/get.dart';
+import 'package:rider/components/trip_components/control_widget.dart';
+import 'package:rider/controllers/auth_controller.dart';
+import 'package:rider/controllers/trip_controller.dart';
+import 'package:rider/utils/trip_constants.dart';
 
-import '../providers/location_vm.dart';
-import 'auth_view.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({Key? key}) : super(key: key);
+class HomeView extends GetResponsiveView<TripController> {
+  HomeView({Key? key}) : super(key: key){
+    Get.lazyPut(() => TripController());
+    _auth = Get.put(AuthController());
+  }
 
-  @override
-  State<HomeView> createState() => _HomeViewState();
-}
 
-class _HomeViewState extends State<HomeView> {
+  late final AuthController _auth;
+
+
   /*late final CameraServices camService;
   CameraController? controller;
   late AnimationController _animationController;*/
 
-  final TextEditingController remarks = TextEditingController();
 
-  late Widget currentWidget = playWidget();
 
-  bool isPlaying = false;
+  /*bool isPlaying = false;
 
   Color accentColor = Colors.greenAccent;
 
@@ -37,13 +33,7 @@ class _HomeViewState extends State<HomeView> {
 
   int _counter = 0;
 
-  final Stopwatch _stopwatch = Stopwatch();
-
-  late Timer _timer;
-
-  String days = '0', hours = '00', minutes = '00', seconds = '00';
-
-  /*@override
+  *//*@override
   void initState() {
     _animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 450));
@@ -55,602 +45,143 @@ class _HomeViewState extends State<HomeView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Visibility(
-        visible: isPlaying,
-        child: FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              currentWidget = playWidget();
-              isPlaying = false;
-              _stopTrip();
-            });
-          },
-          backgroundColor: Colors.black45,
-          child: const Icon(Icons.stop, color: Colors.white),
-        ),
-      ),
-      body: SafeArea(
-        child: Consumer<LocationViewModel>(
-            builder: (context, LocationViewModel appViewModel, child) {
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              Column(
-                //mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  PageTransitionSwitcher(
-                    transitionBuilder: (
-                      Widget child,
-                      Animation<double> animation,
-                      Animation<double> secondaryAnimation,
-                    ) {
-                      return FadeThroughTransition(
-                        animation: animation,
-                        secondaryAnimation: secondaryAnimation,
-                        child: child,
-                      );
-                    },
-                    child: currentWidget,
-                  ),
-                ],
-              ),
-              Positioned(
-                bottom: 100,
-                left: 0,
-                right: 0,
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 60,
-                        fontFamily: 'DIGITAL-7',
-                        color: Colors.black,
-                      ),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: days,
-                        ),
-                        const TextSpan(
-                          text: ':',
-                        ),
-                        TextSpan(
-                          text: hours,
-                        ),
-                        const TextSpan(
-                          text: ':',
-                        ),
-                        TextSpan(
-                          text: minutes,
-                        ),
-                        const TextSpan(
-                          text: ':',
-                        ),
-                        TextSpan(
-                          text: seconds,
-                        ),
-                      ]),
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: IconButton(
-                  alignment: Alignment.centerRight,
-                  constraints: BoxConstraints(
-                    minHeight: _size.height * 0.1,
-                    minWidth: _size.width * 0.2,
-                  ),
-                  onPressed: () async {
-                    Provider.of<UserViewModel>(context, listen: false)
-                        .signOut();
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AuthView(),
-                      ),
-                      (_) => false,
-                    );
-                  },
-                  icon: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Expanded(
-                        child: Icon(
-                          Icons.power_settings_new,
-                          color: Colors.red,
-                        ),
-                      ),
-                      Expanded(child: Text('Sign Out')),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+      floatingActionButton: Obx(() {
+          return Visibility(
+            visible: controller.currentWidget.value != 0,
+            child: FloatingActionButton(
+              onPressed: () {
+
+              },
+              backgroundColor: Colors.black45,
+              child: const Icon(Icons.stop, color: Colors.white),
+            ),
           );
-        }),
+        }
+      ),
+      body: Container(
+        width: double.infinity,
+        height: Get.height,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              'assets/images/background.png',
+            ),
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high,
+            colorFilter: ColorFilter.mode(Colors.black, BlendMode.color),
+          ),
+        ),
+        child: SafeArea(
+          child: Stack(
+              //fit: StackFit.expand,
+              children: [
+                Column(
+                  //mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: PageTransitionSwitcher(
+                        duration: const Duration(seconds: 1),
+                        transitionBuilder: (
+                          Widget child,
+                          Animation<double> animation,
+                          Animation<double> secondaryAnimation,
+                        ) {
+                          return FadeThroughTransition(
+                            animation: animation,
+                            secondaryAnimation: secondaryAnimation,
+                            child: child,
+                          );
+                        },
+                        child: Obx(() {
+                          int value = controller.currentWidget.value;
+                            return ControlWidget(
+                              title: TripConstants.titles[value],
+                              body: TripConstants.body[value],
+                              subtitle: TripConstants.subtitles[value],
+                              action: TripConstants.actions[value],
+                              icon: TripConstants.icons[value],
+                              press: () {
+                                controller.tripControl();
+                              },
+                            );
+                          }
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                /// Timer widget
+                Positioned(
+                  bottom: 100,
+                  left: 0,
+                  right: 0,
+                  child: Obx(() => RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                            style: const TextStyle(
+                              fontSize: 60,
+                              fontFamily: 'DIGITAL-7',
+                              color: Colors.black,
+                            ),
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: controller.days.value,
+                              ),
+                              const TextSpan(
+                                text: ':',
+                              ),
+                              TextSpan(
+                                text: controller.hours.value,
+                              ),
+                              const TextSpan(
+                                text: ':',
+                              ),
+                              TextSpan(
+                                text: controller.minutes.value,
+                              ),
+                              const TextSpan(
+                                text: ':',
+                              ),
+                              TextSpan(
+                                text: controller.seconds.value,
+                              )
+                            ]),
+                      ),
+                  ),
+                ),
+                /// Sign Out widget
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                    alignment: Alignment.centerRight,
+                    constraints: BoxConstraints(
+                      minHeight: Get.height * 0.1,
+                      minWidth: Get.width * 0.2,
+                    ),
+                    onPressed: () async {
+                      _auth.signOut();
+                    },
+                    icon: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Expanded(
+                          child: Icon(
+                            Icons.power_settings_new,
+                            color: Colors.red,
+                          ),
+                        ),
+                        Expanded(child: Text('Sign Out')),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+        ),
       ),
     );
   }
 
-  void _pauseTrip() {
-    Provider.of<LocationViewModel>(context, listen: false).pauseTrip();
-    _stopwatch.stop();
-    _timer.cancel();
-  }
-
-  void _startTrip() {
-    Provider.of<LocationViewModel>(context, listen: false).startTrip();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    //Todo: Change to stopwatch instead
-    _stopwatch.start();
-    setState(() {
-      _timer = Timer.periodic(
-        const Duration(seconds: 1),
-        (timer) {
-          seconds = _stopwatch.elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
-          minutes = _stopwatch.elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
-          hours = _stopwatch.elapsed.inHours.remainder(24).toString().padLeft(2, '0');
-          days = _stopwatch.elapsed.inDays.toString().padLeft(1, '0');
-        },
-      );
-    });
-  }
-
-  void _stopTrip() {
-    Provider.of<LocationViewModel>(context, listen: false).stopTrip(null);
-    setState(() {
-      _stopwatch.reset();
-      _stopwatch.stop();
-      days = '0';
-      hours = '00';
-      minutes = '00';
-      seconds = '00';
-      _timer.cancel();
-    });
-  }
-
-  /*Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-  Container(
-  margin: const EdgeInsets.symmetric(horizontal: 20),
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  decoration: BoxDecoration(
-  border: Border.all(color: Colors.black45),
-  ),
-  child: Center(
-  child: Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-  const FittedBox(
-  child: Text(
-  'CURRENT LOCATION',
-  style: TextStyle(
-  fontSize: 30,
-  ),
-  ),
-  ),
-  Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-  FittedBox(
-  child: RichText(
-  text: TextSpan(
-  text: 'Latitude: ',
-  children: [
-  TextSpan(
-  text: appViewModel.currentLocation.latitude
-      ?.toStringAsFixed(2),
-  style: const TextStyle(
-  fontSize: 15,
-  color: Colors.black,
-  fontWeight: FontWeight.normal),
-  )
-  ],
-  style: const TextStyle(
-  fontSize: 15,
-  color: Colors.black,
-  fontWeight: FontWeight.bold),
-  ),
-  ),
-  ),
-  const SizedBox(width: 20),
-  FittedBox(
-  child: RichText(
-  text: TextSpan(
-  text: 'Longitude: ',
-  children: [
-  TextSpan(
-  text: appViewModel.currentLocation.longitude
-      ?.toStringAsFixed(2),
-  style: const TextStyle(
-  fontSize: 15,
-  color: Colors.black,
-  fontWeight: FontWeight.normal),
-  )
-  ],
-  style: const TextStyle(
-  fontSize: 15,
-  color: Colors.black,
-  fontWeight: FontWeight.bold),
-  ),
-  ),
-  ),
-  ],
-  ),
-  FittedBox(
-  child: RichText(
-  text: TextSpan(
-  text: 'Direction: ',
-  children: [
-  TextSpan(
-  text: appViewModel.currentLocation.heading
-      ?.toStringAsFixed(2),
-  style: const TextStyle(
-  fontSize: 15,
-  color: Colors.black,
-  fontWeight: FontWeight.normal),
-  )
-  ],
-  style: const TextStyle(
-  fontSize: 15,
-  color: Colors.black,
-  fontWeight: FontWeight.bold),
-  ),
-  ),
-  ),
-  ],
-  ),
-  ),
-  ),
-  Container(
-  margin: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  decoration: BoxDecoration(
-  border: Border.all(color: Colors.black45),
-  ),
-  child: TextFormField(
-  controller: remarks,
-  keyboardType: TextInputType.text,
-  textAlign: TextAlign.start,
-  minLines: 3,
-  maxLines: 3,
-  decoration: const InputDecoration(hintText: 'Remarks...'),
-  style: const TextStyle(
-  fontSize: 15,
-  fontStyle: FontStyle.italic,
-  ),
-  ),
-  ),
-  const SizedBox(height: 50),
-  Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-  Container(
-  margin: const EdgeInsets.symmetric(horizontal: 10),
-  decoration: BoxDecoration(
-  border: Border.all(
-  width: 2,
-  ),
-  shape: BoxShape.circle,
-  ),
-  child: IconButton(
-  iconSize: 30,
-  splashColor: accentColor,
-  icon: AnimatedIcon(
-  icon: AnimatedIcons.play_pause,
-  progress: _animationController,
-  ),
-  onPressed: () async {
-  showDialog(context: context, builder: (_){
-  return const AlertDialog();
-  });
-  await appViewModel.startTrip(remarks.text);
-  Navigator.pop(context);
-  _handleOnPressed();
-},
-),
-),
-Container(
-margin: const EdgeInsets.symmetric(horizontal: 10),
-decoration: BoxDecoration(
-border: Border.all(
-width: 2,
-),
-shape: BoxShape.circle,
-),
-child: IconButton(
-iconSize: 30,
-splashColor: accentColor,
-icon: const Icon(
-Icons.stop,
-),
-onPressed: () async {
-setState(() {
-isPlaying = false;
-});
-},
-),
-),
-],
-),
-],
-);*/
-
-  Widget playWidget() => Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              left: _size.width * 0.05,
-              right: _size.width * 0.3,
-              top: _size.height * 0.1,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  child: Text(
-                    'READY ?',
-                    style: GoogleFonts.lato(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline3!
-                            .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                FittedBox(
-                  child: Text(
-                    'GET STARTED',
-                    style: GoogleFonts.abel(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline3!
-                            .copyWith(color: Colors.black)),
-                  ),
-                ),
-                Text(
-                  '''You can start a new trip by tapping on the play button below, enter your comments into the pop-up and proceed on your trip...''',
-                  textAlign: TextAlign.justify,
-                  style: GoogleFonts.abel(
-                      textStyle: Theme.of(context)
-                          .textTheme
-                          .subtitle1!
-                          .copyWith(color: Colors.black)),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: IconButton(
-              onPressed: () async {
-                setState(() {
-                  currentWidget = pauseWidget();
-                  isPlaying = true;
-                  _startTrip();
-                });
-                /*await showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (context) {
-                return const CommentDialog();
-              },
-            );*/
-              },
-              iconSize: 100,
-              constraints: BoxConstraints(
-                minHeight: _size.height * 0.3,
-                minWidth: _size.width * 0.5,
-              ),
-              icon: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.play_arrow),
-                  FittedBox(
-                    child: Text(
-                      'Start...',
-                      style: GoogleFonts.dancingScript(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline5!
-                            .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-
-  Widget pauseWidget() => Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              left: _size.width * 0.05,
-              right: _size.width * 0.3,
-              top: _size.height * 0.1,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  child: Text(
-                    'PAUSE ?',
-                    style: GoogleFonts.lato(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline3!
-                            .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                FittedBox(
-                  child: Text(
-                    'TAKE A BREAK',
-                    style: GoogleFonts.abel(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline3!
-                            .copyWith(color: Colors.black)),
-                  ),
-                ),
-                Text(
-                  '''You can pause a trip by tapping on the pause button below, enter your comments into the pop-up and your trip will be paused...''',
-                  textAlign: TextAlign.justify,
-                  style: GoogleFonts.abel(
-                      textStyle: Theme.of(context)
-                          .textTheme
-                          .subtitle1!
-                          .copyWith(color: Colors.black)),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: IconButton(
-              onPressed: () async {
-                setState(() {
-                  _pauseTrip();
-                  currentWidget = resumeWidget();
-                });
-                /*await showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (context) {
-                return const CommentDialog();
-              },
-            );*/
-              },
-              iconSize: 100,
-              constraints: BoxConstraints(
-                minHeight: _size.height * 0.3,
-                minWidth: _size.width * 0.5,
-              ),
-              icon: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.pause),
-                  FittedBox(
-                    child: Text(
-                      'Pause...',
-                      style: GoogleFonts.dancingScript(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline5!
-                            .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
-
-  Widget resumeWidget() => Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(
-              left: _size.width * 0.05,
-              right: _size.width * 0.3,
-              top: _size.height * 0.1,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FittedBox(
-                  child: Text(
-                    'RESUME ?',
-                    style: GoogleFonts.lato(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline3!
-                            .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold)),
-                  ),
-                ),
-                FittedBox(
-                  child: Text(
-                    'CONTINUE TRIP',
-                    style: GoogleFonts.abel(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline3!
-                            .copyWith(color: Colors.black)),
-                  ),
-                ),
-                Text(
-                  '''You can pause a trip by tapping on the pause button below, enter your comments into the pop-up and your trip will be paused...''',
-                  textAlign: TextAlign.justify,
-                  style: GoogleFonts.abel(
-                      textStyle: Theme.of(context)
-                          .textTheme
-                          .subtitle1!
-                          .copyWith(color: Colors.black)),
-                ),
-              ],
-            ),
-          ),
-          Center(
-            child: IconButton(
-              onPressed: () async {
-                setState(() {
-                  currentWidget = pauseWidget();
-                  _startTrip();
-                });
-                /*await showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (context) {
-                return const CommentDialog();
-              },
-            );*/
-              },
-              iconSize: 100,
-              constraints: BoxConstraints(
-                minHeight: _size.height * 0.3,
-                minWidth: _size.width * 0.5,
-              ),
-              icon: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.replay),
-                  FittedBox(
-                    child: Text(
-                      'Resume...',
-                      style: GoogleFonts.dancingScript(
-                        textStyle: Theme.of(context)
-                            .textTheme
-                            .headline5!
-                            .copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      );
 }

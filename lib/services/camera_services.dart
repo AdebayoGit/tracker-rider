@@ -1,4 +1,3 @@
-/*
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -8,28 +7,27 @@ import 'package:rider/models/status.dart';
 import 'package:rider/services/device_services.dart';
 
 class CameraServices {
-
   CameraController? controller;
   XFile? videoFile;
-  bool enableAudio = true;
-  List<CameraDescription> cameras = <CameraDescription>[];
   final FirebaseStorage storage = FirebaseStorage.instance;
 
   CameraServices(this.controller);
 
   Future<Object> onNewCameraSelected() async {
-    if (controller != null) {
-      await controller!.dispose();
-    }
-
-    final CameraController cameraController = CameraController(
-      cameras[1],
-      ResolutionPreset.low,
-      enableAudio: enableAudio,
-    );
-    controller = cameraController;
-
     try {
+      List<CameraDescription> cameras = await availableCameras();
+
+      if (controller != null) {
+        await controller!.dispose();
+      }
+
+      final CameraController cameraController = CameraController(
+        cameras[1],
+        ResolutionPreset.low,
+        enableAudio: true,
+      );
+      controller = cameraController;
+
       await cameraController.initialize();
       return Success(response: "Camera Initialized");
     } on CameraException catch (e) {
@@ -41,14 +39,13 @@ class CameraServices {
     final CameraController? cameraController = controller;
 
     if ((cameraController?.value.isRecordingVideo)!) {
-      // A recording is already started, do nothing.
+      /// A recording has already started, do nothing.
       return;
     }
 
     try {
       await cameraController!.startVideoRecording();
     } on CameraException catch (e) {
-      //_showCameraException(e);
       return;
     }
   }
@@ -56,7 +53,8 @@ class CameraServices {
   Future<String?> stopVideoRecording() async {
     final CameraController? _cameraController = controller;
 
-    if (_cameraController == null || !_cameraController.value.isRecordingVideo) {
+    if (_cameraController == null ||
+        !_cameraController.value.isRecordingVideo) {
       return null;
     }
 
@@ -102,20 +100,11 @@ class CameraServices {
     }
   }
 
-  Future<void> getAvailableCameras() async {
-    try {
-      cameras = await availableCameras();
-      onNewCameraSelected();
-    } on CameraException catch (e) {
-      Failure(code: e.code, errorResponse: e.description as String);
-    }
-  }
-
   Future<String> uploadVideo(XFile video) async {
     String? username = await DeviceServices.instance.getUsername();
     Reference ref = storage.ref().child('trips/$username');
-      await ref.putFile(File(video.path));
-      String url = await ref.getDownloadURL();
-      return url;
-    }
-  }*/
+    await ref.putFile(File(video.path));
+    String url = await ref.getDownloadURL();
+    return url;
+  }
+}

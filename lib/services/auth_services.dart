@@ -1,28 +1,26 @@
-
-import 'dart:io';
+import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:password/password.dart';
 import 'package:rider/models/rider.dart';
 import 'package:rider/models/status.dart';
 import 'package:rider/services/device_services.dart';
 
-import '../utils/app_constants.dart';
-
 class AuthServices {
   late FirebaseAuth _auth;
   late FirebaseFirestore _firestore;
+  late FirebaseFunctions _functions;
   late CollectionReference _ridersCollection;
-  late PBKDF2 _algorithm;
   late DeviceServices _device;
 
   AuthServices() {
     _auth = FirebaseAuth.instance;
-    _algorithm = PBKDF2();
     _firestore = FirebaseFirestore.instance;
+    _functions = FirebaseFunctions.instance;
     _ridersCollection = _firestore.collection('riders');
     _device = DeviceServices.instance;
+
   }
 
   Future<Object?> currentRider () async {
@@ -36,27 +34,38 @@ class AuthServices {
     }
   }
 
-  Future<Object> signIn(String username, String password) async {
+  Future<Object> createToken(String username, String password) async {
     try {
-      User? user = _auth.currentUser;
-      if(user == null){
-        await _auth.signInAnonymously();
-      }
-      return verifyPassword(username, password);
+      HttpsCallable callable = _functions.httpsCallable('signIn');
+      return await callable.call(<String, dynamic>{
+        'username': username,
+        'password': password,
+      }).then((value) => signIn(value.data["token"]));
+    } on FirebaseFunctionsException catch (e) {
+      return Failure(code: e.code, errorResponse: e.message as String);
+    } catch (e) {
+      return Failure(code: e.toString(), errorResponse: "Unknown Error");
+    }
+  }
+
+  Future<Object> signIn(String customToken) async {
+    try {
+      print(customToken);
+      User user = await _auth.signInWithCustomToken(customToken).then((value) => value.user!);
+      return Success(response: user);
     } on FirebaseAuthException catch (e) {
       return Failure(code: e.code, errorResponse: e.message as String);
     }
   }
 
   Future<Object> signUp(String name, String username, String password) async {
-    final String hash = Password.hash(password, _algorithm);
     String vehicleId = await DeviceServices.instance.getVehicleId();
     try {
       await _auth.signInAnonymously();
       _ridersCollection.doc(username).set({
         'name': name,
         'username': username,
-        'password': hash,
+        'password': '',
         'created': DateTime.now(),
         'registrationVehicle': vehicleId,
         'lastLogin': '',
@@ -78,34 +87,7 @@ class AuthServices {
     }
   }
 
-  Future<Object> verifyPassword(String username, String password) async {
-    String passwordHash;
-    try {
-      return _ridersCollection.doc(username).get().then((value) async {
-        passwordHash = value['password'];
-        if (Password.verify(password, passwordHash)) {
-          _ridersCollection.doc(username).update({
-            'currentVehicle': await _device.getVehicleId(),
-            'lastLogin': DateTime.now(),
-          });
-          DeviceServices.instance.addDriverToDevice(username);
-          return Success(response: Rider.fromSnap(value));
-        }
-        return Failure(code: AppConstants.invalidResponse,
-            errorResponse: 'Wrong Password');
-      }, onError: (error){
-        return Failure(code: AppConstants.invalidResponse,
-            errorResponse: 'User not found');
-      }).onError((error, stackTrace) => Failure(code: AppConstants.invalidResponse,
-          errorResponse: 'User not found'));
-    } on HttpException {
-      return Failure(code: AppConstants.noInternet, errorResponse: 'No Internet Connection');
-      } on SocketException {
-      return Failure(code: AppConstants.noInternet, errorResponse: 'No Internet Connection');
-      } on FormatException {
-      return Failure(code: AppConstants.invalidFormat, errorResponse: 'Invalid Format');
-      } catch (e) {
-        return Failure(code: AppConstants.unknownError, errorResponse: 'Unknown Error');
-      }
+  Stream<User?> authStream() {
+    return _auth.authStateChanges();
   }
 }

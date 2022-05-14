@@ -1,58 +1,72 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:rider/controllers/trip_controller.dart';
 
-class CommentDialog extends StatefulWidget {
-  const CommentDialog({Key? key}) : super(key: key);
-
-  @override
-  State<CommentDialog> createState() => _CommentDialogState();
-}
-
-class _CommentDialogState extends State<CommentDialog> {
-  bool _loading = false;
-
-  final TextEditingController _username = TextEditingController();
-
-  final TextEditingController _password = TextEditingController();
+class TripRemarksDialog extends GetResponsiveView<TripController> {
+  TripRemarksDialog({Key? key}) : super(key: key){
+    Get.find<TripController>();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Size _size = MediaQuery.of(context).size;
-
     return Padding(
-      padding:
-      EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: SingleChildScrollView(
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
+        physics: const BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
               child: Image.asset('./assets/images/trucks.jpg'),
               //height: 200,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30.0),
               child: TextFormField(
-                controller: _username,
+                controller: controller.remarks,
+                maxLines: 5,
                 keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                    label: Text('Username'),
-                    hintText: 'TruckMan',
-                    prefixIcon: Icon(Icons.person)),
+                cursorColor: Colors.grey,
+                decoration: InputDecoration(
+                    label: const Text('Remarks'),
+                    labelStyle: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey[900]!,
+                    ),
+                    hintText: 'Please provide more info about your trip',
+                    hintStyle: const TextStyle(
+                      fontStyle: FontStyle.italic,
+                    ),
+                    prefixIcon: Icon(Icons.edit_note, color: Colors.grey[900]!),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.grey,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.grey[900]!,
+                    ),
+                  ),
+                  focusColor: Colors.grey,
+                  border: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
               ),
             ),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 20),
               alignment: Alignment.center,
-              child: !_loading
-                  ? ElevatedButton(
-                onPressed: () {
-                  //signIn();
-                },
+              child: ElevatedButton(
+                onPressed: controller.tripControl,
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25)),
-                  maximumSize: Size(_size.width * 0.8, 50),
-                  primary: Colors.grey,
+                  maximumSize: Size(Get.width * 0.8, 50),
+                  primary: Colors.grey[900],
                   textStyle: const TextStyle(
                     color: Colors.white,
                   ),
@@ -71,7 +85,6 @@ class _CommentDialogState extends State<CommentDialog> {
                   ),
                 ),
               )
-                  : const CircularProgressIndicator(),
             ),
           ],
         ),

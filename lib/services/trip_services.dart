@@ -1,39 +1,29 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:location/location.dart';
-import 'package:rider/services/device_services.dart';
 
 import '../models/status.dart';
 import '../utils/app_constants.dart';
-import 'log_services.dart';
 
 class TripServices {
-  late final DeviceServices _device = DeviceServices.instance;
-  late final FirebaseFirestore _store = FirebaseFirestore.instance;
+
+  final FirebaseFirestore _store = FirebaseFirestore.instance;
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   late final CollectionReference _trips = _store.collection('trips');
 
-  static List<Map<String, dynamic>> _logs = [];
-
-
-  Future<Object> createTrip(LocationData locationData, [String? remark]) async {
+  Object createTrip(LocationData locationData, [String? remark]) {
     try {
-      String? username = await _device.getUsername();
-      Map<String, dynamic> location = <String, dynamic>{
-        'location': GeoPoint(locationData.longitude!, locationData.latitude!),
-        'time': locationData.time,
-        'direction': locationData.heading,
-        'speed': locationData.speed,
-        'remark': remark ?? '',
-      };
-      String tripId = username! + locationData.time.toString();
+      String username = _auth.currentUser?.uid ?? '';
+      String tripId = username + DateTime.fromMillisecondsSinceEpoch(locationData.time!.toInt()).toString();
       _trips.doc(tripId).set({
         'riderId': username,
-        'start': location,
-        'currentLocation': location,
+        'start': createLocationInfo(location: locationData),
         'pauses': [],
+        'initial remarks': remark,
       });
       return Success(response: tripId);
     } on HttpException {
@@ -55,15 +45,12 @@ class TripServices {
 
   Future<Failure?> pauseTrip(String id, String? remark, LocationData locationData) async {
     try {
-      Map<String, dynamic> pause = <String, dynamic>{
-        'location': GeoPoint(locationData.longitude!, locationData.latitude!),
-        'time': locationData.time,
-        'direction': locationData.heading,
-        'remark': remark ?? '',
-      };
       _trips.doc(id).get().then((DocumentSnapshot doc) {
         List<dynamic> pauses = doc['pauses'];
-        pauses.add(pause);
+        pauses.add({
+          'location': createLocationInfo(location: locationData),
+          'remark': remark,
+        });
         doc.reference.update({
         'pauses': pauses,
         });
@@ -86,18 +73,12 @@ class TripServices {
     }
   }
 
-  Future<Failure?> stopTrip(String id, String remark, String url, LocationData locationData) async {
+  Future<Failure?> stopTrip(String id, String remark, LocationData locationData) async {
     try {
-      Map<String, dynamic> stop = <String, dynamic>{
-        'location': GeoPoint(locationData.longitude!, locationData.latitude!),
-        'time': locationData.time,
-        'direction': locationData.heading,
-        'remark': remark,
-      };
       _trips.doc(id).get().then((DocumentSnapshot doc) {
         doc.reference.update({
-          'stop': stop,
-          'video_url': url,
+          'location': createLocationInfo(location: locationData),
+          'remark': remark,
         });
       });
       return null;
@@ -118,23 +99,9 @@ class TripServices {
     }
   }
 
-  Future<Object?> updateTrip(String id, LocationData locationData) async {
-    Map<String, String> location = <String, String>{
-      'longitude': locationData.longitude!.toString(),
-      'latitude': locationData.latitude!.toString(),
-      'time': locationData.time.toString(),
-      'direction': locationData.heading.toString(),
-      'speed': locationData.speed.toString(),
-    };
+  Future<Object?> addLocation(String tripId, Map<String, dynamic> location) async {
     try {
-        _trips.doc(id).update({
-          'currentLocation': {
-            'location': GeoPoint(locationData.longitude!, locationData.latitude!),
-            'time': locationData.time,
-            'direction': locationData.heading,
-            'speed': locationData.speed,
-          },
-        });
+      _trips.doc(tripId).collection('locations').add(location);
       return location;
     } on HttpException {
       return Failure(
@@ -151,5 +118,16 @@ class TripServices {
       return Failure(
           code: AppConstants.unknownError, errorResponse: 'Unknown Error');
     }
+  }
+
+  Map<String, dynamic> createLocationInfo({required LocationData location}) {
+    return <String, dynamic>{
+      'location': GeoPoint(location.longitude!, location.latitude!),
+      'time': DateTime.fromMillisecondsSinceEpoch(location.time!.toInt()),
+      'direction': location.heading,
+      'speedInfo': {'speed': location.speed, 'accuracy': location.speedAccuracy},
+      'altitude': location.altitude,
+
+    };
   }
 }

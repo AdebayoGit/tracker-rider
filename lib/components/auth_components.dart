@@ -116,13 +116,21 @@ class _PassTextFieldState extends State<PassTextField> {
             validator: widget.validator,
             keyboardType: TextInputType.visiblePassword,
             decoration: InputDecoration(
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.lock,
+                color: Colors.grey[900],
               ),
               hintText: widget.field,
               suffixIcon: IconButton(
-                icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+                icon: Visibility(
+                  visible: _obscureText,
+                  child: Icon(Icons.visibility, color: Colors.grey[900],),
+                  replacement: Icon(Icons.visibility_off, color: Colors.grey[900],),
+                ),
                 onPressed: _toggle,
+              ),
+              focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey[900]!)
               ),
             ),
     );

@@ -141,7 +141,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AuthView(),
+                      builder: (context) => AuthView(),
                     ),
                   );
                 } else {
