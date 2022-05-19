@@ -13,34 +13,7 @@ class HomeView extends GetResponsiveView<TripController> {
     _auth = Get.put(AuthController());
   }
 
-
   late final AuthController _auth;
-
-
-  /*late final CameraServices camService;
-  CameraController? controller;
-  late AnimationController _animationController;*/
-
-
-
-  /*bool isPlaying = false;
-
-  Color accentColor = Colors.greenAccent;
-
-  final Size _size = SizeConfig.size;
-
-  Duration _duration = const Duration(seconds: (1));
-
-  int _counter = 0;
-
-  *//*@override
-  void initState() {
-    _animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 450));
-    camService = CameraServices(controller);
-    camService.getAvailableCameras();
-    super.initState();
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +22,7 @@ class HomeView extends GetResponsiveView<TripController> {
           return Visibility(
             visible: controller.currentWidget.value != 0,
             child: FloatingActionButton(
-              onPressed: () {
-
-              },
+              onPressed: controller.stopTrip,
               backgroundColor: Colors.black45,
               child: const Icon(Icons.stop, color: Colors.white),
             ),

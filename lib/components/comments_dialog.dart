@@ -18,7 +18,6 @@ class TripRemarksDialog extends GetResponsiveView<TripController> {
           children: [
             SizedBox(
               child: Image.asset('./assets/images/trucks.jpg'),
-              //height: 200,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 30.0),

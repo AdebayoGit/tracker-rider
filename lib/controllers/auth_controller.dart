@@ -17,13 +17,7 @@ class AuthController extends GetxController {
 
   User? _rider;
 
-  Error? _error;
-
-  bool loading = false;
-
   User? get rider => _rider;
-
-  Error? get error => _error;
 
   @override
   void onInit() async {
@@ -32,18 +26,14 @@ class AuthController extends GetxController {
     super.onInit();
   }
 
-  setLoading(bool loading) {
-    this.loading = loading;
-  }
-
   Future<dynamic> signIn(String username, String password) async {
-    Get.dialog(const ProgressDialog(status: 'Please wait...'));
-    /*var response = await AuthServices().createToken(username, password);
+    Get.dialog(const ProgressDialog(status: 'Please wait...'), barrierDismissible: false);
+    var response = await AuthServices().createToken(username, password);
     if (response is Success) {
       _rider = response.response as User;
     } else if (response is Failure) {
       return Error(code: response.code, message: response.errorResponse);
-    }*/
+    }
   }
 
   Future<dynamic> signOut() async {
@@ -57,7 +47,6 @@ class AuthController extends GetxController {
 
   Future<dynamic> getCurrentUser() async {
     Object? response = await AuthServices().currentRider();
-
     if (response is Success) {
       _rider = response.response as User;
       return rider;
@@ -76,7 +65,7 @@ class AuthController extends GetxController {
             duration: const Duration(seconds: 1),
           );
         } else {
-          Get.offAll(() => AuthView(),
+          Get.offAll(() => const AuthView(),
             transition: Transition.fadeIn,
             duration: const Duration(seconds: 1),
           );

@@ -18,7 +18,8 @@ class TripController extends GetxController {
 
   final TextEditingController remarks = TextEditingController();
 
-  late final StreamSubscription<LocationData> _locationStream;
+///Todo: uncomment to handle control of location stream
+  // late final StreamSubscription<LocationData> _locationStream;
 
   late Timer _timer;
 
@@ -53,7 +54,7 @@ class TripController extends GetxController {
 
   Future<void> startTrip() async {
     Get.back();
-    Get.dialog(const ProgressDialog(status: 'Please wait...'));
+    showPleaseWaitDialog();
     await _location.checkLocationPermission();
     Object response =
         _trips.createTrip(await _location.getCurrentLocation(), remarks.text);
@@ -82,15 +83,16 @@ class TripController extends GetxController {
 
   Future<void> restartTrip() async {
     Get.back();
-    Get.dialog(const ProgressDialog(status: 'Please wait...'));
+    showPleaseWaitDialog();
     await _location.checkLocationPermission();
     tripUI(1);
     startTimer();
+    Get.back();
   }
 
   Future<void> pauseTrip() async {
     Get.back();
-    Get.dialog(const ProgressDialog(status: 'Please wait...'));
+    showPleaseWaitDialog();
     Object response = _trips.pauseTrip(
         _tripId, remarks.text, await _location.getCurrentLocation());
     remarks.clear();
@@ -111,6 +113,30 @@ class TripController extends GetxController {
     ));
     tripUI(2);
     pauseTimer();
+  }
+
+  Future<void> stopTrip() async {
+    //Get.back();
+    showPleaseWaitDialog();
+    Object? response = _trips.stopTrip(_tripId, await _location.getCurrentLocation());
+    remarks.clear();
+    if (response != null) {
+      Failure failure = response as Failure;
+      Get.back();
+      Get.showSnackbar(GetSnackBar(
+        title: failure.code,
+        message: failure.errorResponse.toString(),
+        duration: const Duration(seconds: 2),
+      ));
+      return;
+    }
+    Get.back();
+    Get.showSnackbar(GetSnackBar(
+      message: "Trip $_tripId successfully completed",
+      duration: const Duration(milliseconds: 500),
+    ));
+    tripUI(0);
+    resetTimer();
   }
 
   void startTimer() {
@@ -147,9 +173,16 @@ class TripController extends GetxController {
   }
 
   void _getLocationUpdates() {
-    _locationStream = _location.listenForLocationUpdates().listen((LocationData locationData) {
+    _location.listenForLocationUpdates().listen((LocationData locationData) {
       _trips.addLocation(
           _tripId, _trips.createLocationInfo(location: locationData));
     });
+  }
+
+  void showPleaseWaitDialog() {
+    Get.dialog(
+      const ProgressDialog(status: 'Please Wait'),
+      barrierDismissible: false,
+    );
   }
 }

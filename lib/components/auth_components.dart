@@ -85,12 +85,14 @@ class AuthTextField extends StatelessWidget {
 class PassTextField extends StatefulWidget {
   final String?Function(String?)? validator;
   final TextEditingController controller;
+  final FocusNode? focusNode;
   final String field;
 
   const PassTextField({
     Key? key,
     required this.validator,
     required this.controller,
+    this.focusNode,
     required this.field,
   }) : super(key: key);
 
@@ -114,6 +116,7 @@ class _PassTextFieldState extends State<PassTextField> {
             controller: widget.controller,
             obscureText: _obscureText,
             validator: widget.validator,
+            focusNode: widget.focusNode,
             keyboardType: TextInputType.visiblePassword,
             decoration: InputDecoration(
               prefixIcon: Icon(

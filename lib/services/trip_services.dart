@@ -73,13 +73,11 @@ class TripServices {
     }
   }
 
-  Future<Failure?> stopTrip(String id, String remark, LocationData locationData) async {
+  Object? stopTrip(String tripId, LocationData locationData) {
     try {
-      _trips.doc(id).get().then((DocumentSnapshot doc) {
-        doc.reference.update({
-          'location': createLocationInfo(location: locationData),
-          'remark': remark,
-        });
+      _trips.doc(tripId).set({
+        'stop': createLocationInfo(location: locationData),
+        // 'final remarks': remark,
       });
       return null;
     } on HttpException {

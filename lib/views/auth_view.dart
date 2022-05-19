@@ -49,6 +49,7 @@ class AuthView extends StatelessWidget {
                                     fontWeight: FontWeight.bold)),
                       ),
                     ),
+
                     /// Subtitle Text
                     FittedBox(
                       child: Text(
@@ -60,6 +61,7 @@ class AuthView extends StatelessWidget {
                                 .copyWith(color: Colors.black)),
                       ),
                     ),
+
                     /// Body Text
                     Text(
                       '''Monitoring trips has never been easier with the passenger app you can share your trip routes without doing too much...''',
@@ -70,6 +72,7 @@ class AuthView extends StatelessWidget {
                               .subtitle1!
                               .copyWith(color: Colors.black)),
                     ),
+
                     /// Proceed Button
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -94,7 +97,13 @@ class AuthView extends StatelessWidget {
                             margin: EdgeInsets.zero,
                             child: GestureDetector(
                               onTap: () {
-                                Get.bottomSheet(SignIn(), backgroundColor: Colors.white);
+                                Get.bottomSheet(SignIn(),
+                                    isScrollControlled: false,
+                                    backgroundColor: Colors.white,
+                                    enterBottomSheetDuration:
+                                        const Duration(milliseconds: 500),
+                                    exitBottomSheetDuration:
+                                        const Duration(milliseconds: 500));
                               },
                               child: Image.asset(
                                 'assets/images/auth_button.png',
@@ -107,10 +116,11 @@ class AuthView extends StatelessWidget {
                   ],
                 ),
               ),
+
               /// Register Truck Button
               Positioned(
                 top: 0,
-                right: 0,
+                right: 10,
                 child: TextButton(
                   onPressed: () {
                     Navigator.push(
@@ -126,6 +136,7 @@ class AuthView extends StatelessWidget {
                     ),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       Text(
                         'Register Truck',
@@ -133,10 +144,11 @@ class AuthView extends StatelessWidget {
                           color: Colors.grey[900],
                         ),
                       ),
+                      const SizedBox(width: 10),
                       Icon(
                         Icons.local_shipping,
                         color: Colors.grey[900],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -156,80 +168,89 @@ class SignIn extends GetResponsiveView<AuthController> {
 
   final TextEditingController _password = TextEditingController();
 
+  final FocusNode _passwordFocusNode = FocusNode();
+
+  final FocusNode _usernameFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SingleChildScrollView(
-        child: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            SizedBox(
-              child: Image.asset('./assets/images/trucks.jpg'),
-              //height: 200,
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          SizedBox(
+            child: Image.asset('./assets/images/trucks.jpg'),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: TextFormField(
+              controller: _username,
+              focusNode: _usernameFocusNode,
+              keyboardType: TextInputType.text,
+              validator: Validator.nameValidator,
+              decoration: InputDecoration(
+                label: Text(
+                  'Username',
+                  style: TextStyle(
+                    color: Colors.grey[900],
+                  ),
+                ),
+                hintText: 'TruckMan',
+                prefixIcon: Icon(
+                  Icons.person,
+                  color: Colors.grey[900],
+                ),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[900]!)),
+              ),
+              onFieldSubmitted: (_) {
+                _passwordFocusNode.requestFocus();
+              },
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: TextFormField(
-                controller: _username,
-                keyboardType: TextInputType.text,
-                decoration: InputDecoration(
-                    label: Text(
-                        'Username',
-                      style: TextStyle(
-                        color: Colors.grey[900],
-                      ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30.0),
+            child: PassTextField(
+                validator: Validator.passwordValidator,
+                focusNode: _passwordFocusNode,
+                controller: _password,
+                field: 'Password',
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 20),
+            alignment: Alignment.center,
+            child: ElevatedButton(
+              onPressed: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                controller.signIn(_username.text, _password.text);
+              },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25)),
+                maximumSize: Size(Get.width * 0.8, 50),
+                primary: Colors.grey[900],
+                textStyle: const TextStyle(
+                  color: Colors.white,
+                ),
+              ),
+              child: const SizedBox(
+                height: 50,
+                child: Center(
+                  child: Text(
+                    'Proceed',
+                    style: TextStyle(
+                      fontSize: 20,
+                      letterSpacing: 3,
+                      fontWeight: FontWeight.bold,
                     ),
-                    hintText: 'TruckMan',
-                    prefixIcon: Icon(Icons.person, color: Colors.grey[900],),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey[900]!)
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30.0),
-              child: PassTextField(
-                  validator: Validator.passwordValidator,
-                  controller: _password,
-                  field: 'Password'),
-            ),
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 20),
-              alignment: Alignment.center,
-              child: ElevatedButton(
-                      onPressed: () {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        controller.signIn(_username.text, _password.text);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25)),
-                        maximumSize: Size(Get.width * 0.8, 50),
-                        primary: Colors.grey[900],
-                        textStyle: const TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                      child: const SizedBox(
-                        height: 50,
-                        child: Center(
-                          child: Text(
-                            'Proceed',
-                            style: TextStyle(
-                              fontSize: 20,
-                              letterSpacing: 3,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
