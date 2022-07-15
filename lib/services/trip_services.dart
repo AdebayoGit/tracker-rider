@@ -13,19 +13,17 @@ class TripServices {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  late final CollectionReference _trips = _store.collection('trips');
+  late final CollectionReference _trips = _store.collection('riders/${_auth.currentUser?.uid}/trips');
 
-  Object createTrip(LocationData locationData, [String? remark]) {
+  Future<Object> createTrip(LocationData locationData, [String? remark]) async {
     try {
-      String username = _auth.currentUser?.uid ?? '';
-      String tripId = username + DateTime.fromMillisecondsSinceEpoch(locationData.time!.toInt()).toString();
-      _trips.doc(tripId).set({
-        'riderId': username,
+      return await _trips.add({
+        'createdAt': DateTime.fromMillisecondsSinceEpoch(locationData.time!.toInt()).toString(),
         'start': createLocationInfo(location: locationData),
+        'stop': null,
         'pauses': [],
         'initial remarks': remark,
-      });
-      return Success(response: tripId);
+      }).then((value) => Success(response: value.id));
     } on HttpException {
       return Failure(
           code: AppConstants.noInternet,
@@ -116,6 +114,18 @@ class TripServices {
       return Failure(
           code: AppConstants.unknownError, errorResponse: 'Unknown Error');
     }
+  }
+
+  Future<String?> checkForUncompletedTrips() async {
+    QuerySnapshot snap = await _trips.orderBy('createdAt').limitToLast(1).get();
+    for (var i in snap.docs){
+      if (i['stop'] == null){
+        return i.id;
+      } else {
+        return null;
+      }
+    }
+    return null;
   }
 
   Map<String, dynamic> createLocationInfo({required LocationData location}) {

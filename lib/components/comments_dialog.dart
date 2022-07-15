@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rider/controllers/trip_controller.dart';
 
+import '../utils/app_theme.dart';
+
 class TripRemarksDialog extends GetResponsiveView<TripController> {
   TripRemarksDialog({Key? key}) : super(key: key){
     Get.find<TripController>();
@@ -79,6 +81,7 @@ class TripRemarksDialog extends GetResponsiveView<TripController> {
                         fontSize: 20,
                         letterSpacing: 3,
                         fontWeight: FontWeight.bold,
+                        color: AppTheme.nearlyWhite,
                       ),
                     ),
                   ),

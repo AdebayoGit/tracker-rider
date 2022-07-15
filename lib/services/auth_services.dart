@@ -9,34 +9,33 @@ import 'package:rider/services/device_services.dart';
 
 class AuthServices {
   late FirebaseAuth _auth;
-  late FirebaseFirestore _firestore;
+  late FirebaseFirestore _store;
   late FirebaseFunctions _functions;
   late CollectionReference _ridersCollection;
   late DeviceServices _device;
 
   AuthServices() {
     _auth = FirebaseAuth.instance;
-    _firestore = FirebaseFirestore.instance;
+    _store = FirebaseFirestore.instance;
     _functions = FirebaseFunctions.instance;
-    _ridersCollection = _firestore.collection('riders');
+    _ridersCollection = _store.collection('riders');
     _device = DeviceServices.instance;
 
   }
 
-  Future<Object?> currentRider () async {
-    String? username = await DeviceServices.instance.getUsername();
-    if(username == null){
-      return null;
-    } else {
-      return _ridersCollection.doc(username).get().then((value) {
-        return Success(response: Rider.fromSnap(value));
-      });
+  Future<Object?> currentDriver (String uid) async {
+      try {
+        return _ridersCollection.doc(uid).get().then((value) {
+          return Success(response: Driver.fromSnapshot(value));
+        });
+      } on Exception catch (e) {
+        return Failure(code: "100", errorResponse: e as String);
+      }
     }
-  }
 
   Future<Object> createToken(String username, String password) async {
     try {
-      HttpsCallable callable = _functions.httpsCallable('signIn');
+      HttpsCallable callable = _functions.httpsCallable('signin');
       return await callable.call(<String, dynamic>{
         'username': username,
         'password': password,
@@ -50,28 +49,8 @@ class AuthServices {
 
   Future<Object> signIn(String customToken) async {
     try {
-      print(customToken);
       User user = await _auth.signInWithCustomToken(customToken).then((value) => value.user!);
       return Success(response: user);
-    } on FirebaseAuthException catch (e) {
-      return Failure(code: e.code, errorResponse: e.message as String);
-    }
-  }
-
-  Future<Object> signUp(String name, String username, String password) async {
-    String vehicleId = await DeviceServices.instance.getVehicleId();
-    try {
-      await _auth.signInAnonymously();
-      _ridersCollection.doc(username).set({
-        'name': name,
-        'username': username,
-        'password': '',
-        'created': DateTime.now(),
-        'registrationVehicle': vehicleId,
-        'lastLogin': '',
-        'currentVehicle': vehicleId,
-      });
-      return Success(response: 'Successfully Registered User');
     } on FirebaseAuthException catch (e) {
       return Failure(code: e.code, errorResponse: e.message as String);
     }

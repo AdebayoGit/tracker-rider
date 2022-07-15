@@ -244,6 +244,7 @@ class SignIn extends GetResponsiveView<AuthController> {
                       fontSize: 20,
                       letterSpacing: 3,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
