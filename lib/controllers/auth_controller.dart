@@ -55,15 +55,6 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _getCurrentDriver() async {
-    Object? response = await _authServices.currentDriver(_user.uid);
-    if (response is Success) {
-      driver = response.response as Driver;
-    } else if (response is Failure) {
-      ResponseHelpers.showSnackbar(response.errorResponse.toString());
-    }
-  }
-
   Future<void> _authenticatedUserRoutine(User user) async {
     bool online = await presence.checkForMultipleAuth(user.uid);
     if (online) {
@@ -74,7 +65,6 @@ class AuthController extends GetxController {
           backgroundColor: Colors.transparent));
     } else {
       _user = user;
-      _getCurrentDriver();
       presence.updateUserPresence(user.uid);
       Get.offAll(() => const CustomNavigator(),
         transition: Transition.fadeIn,
