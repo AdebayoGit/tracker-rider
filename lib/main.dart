@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rider/controllers/driver_controller.dart';
 import 'package:rider/controllers/location_controller.dart';
 import 'package:rider/helpers/presence.dart';
 import 'package:rider/services/device_services.dart';
@@ -28,18 +29,8 @@ class Passenger extends StatelessWidget {
         ),
         home: const SplashView(),
         onInit: () async {
-          bool _isRegistered = await DeviceServices.instance.isRegistered();
-          if (!_isRegistered) {
-            Get.offAll(
-              () => const RegisterDevice(),
-              transition: Transition.fadeIn,
-              duration: const Duration(seconds: 1),
-            );
-          } else {
-            Get.put(AuthController());
-          }
-        }
-        //onDispose: ,
-        );
+          Get.put(AuthController());
+          Get.put(DriverController());
+        });
   }
 }

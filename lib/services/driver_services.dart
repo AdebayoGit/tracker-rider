@@ -15,14 +15,13 @@ class DriverServices {
     _driversCollection = _store.collection('riders');
   }
 
-
-  Future<Object?> getCurrentDriver(String uid) async {
+  Future<Status> getCurrentDriver(String uid) async {
     try {
       return _driversCollection.doc(uid).get().then((value) {
         return Success(response: Driver.fromSnapshot(value));
       });
     } on Exception catch (e) {
-      return Failure(code: "100", errorResponse: e as String);
+      return Failure(code: "100", response: e as String);
     }
   }
 }

@@ -23,7 +23,7 @@ class AuthServices {
   }
 
 
-  Future<Object> createToken(String username, String password) async {
+  Future<Status> createToken(String username, String password) async {
     try {
       HttpsCallable callable = _functions.httpsCallable('signin');
       return await callable.call(<String, dynamic>{
@@ -31,28 +31,28 @@ class AuthServices {
         'password': password,
       }).then((value) => signIn(value.data["token"]));
     } on FirebaseFunctionsException catch (e) {
-      return Failure(code: e.code, errorResponse: e.message as String);
+      return Failure(code: e.code, response: e.message as String);
     } catch (e) {
-      return Failure(code: e.toString(), errorResponse: "Unknown Error");
+      return Failure(code: e.toString(), response: "Unknown Error");
     }
   }
 
-  Future<Object> signIn(String customToken) async {
+  Future<Status> signIn(String customToken) async {
     try {
       User user = await _auth.signInWithCustomToken(customToken).then((value) => value.user!);
       return Success(response: user);
     } on FirebaseAuthException catch (e) {
-      return Failure(code: e.code, errorResponse: e.message as String);
+      return Failure(code: e.code, response: e.message as String);
     }
   }
 
-  Future<Object> signOut() async {
+  Future<Status> signOut() async {
     try {
       await _auth.signOut();
       await _device.removeDriverFromDevice();
-      return Success(response: '');
+      return Success(response: 'User signed out successfully!');
     } on FirebaseAuthException catch (e) {
-      return Failure(code: e.code, errorResponse: e.message as String);
+      return Failure(code: e.code, response: e.message as String);
     }
   }
 

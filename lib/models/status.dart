@@ -1,22 +1,25 @@
-class Success {
+class Status {
   String code;
   Object response;
-  Success({this.code = '200', required this.response});
+  Status({required this.code, required this.response});
 }
 
-class Failure {
-  String code;
-  Object errorResponse;
-  Failure({required this.code, required this.errorResponse});
+class Success extends Status{
+
+  Success({required Object response}) : super(code: '200', response: response);
 
   @override
   String toString(){
-    return "Error: $code \n$errorResponse";
+    return "Completed without an error";
   }
 }
 
-class Error{
-  String code;
-  Object message;
-  Error({required this.code, required this.message});
+class Failure extends Status{
+
+  Failure({required String code, required Object response}) : super(code: code, response: response);
+
+  @override
+  String toString(){
+    return "Completed with an error";
+  }
 }

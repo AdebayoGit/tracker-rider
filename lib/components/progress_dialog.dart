@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rider/utils/app_theme.dart';
 
 class ProgressDialog extends StatelessWidget {
 
@@ -27,7 +28,7 @@ class ProgressDialog extends StatelessWidget {
             children: <Widget>[
               const FittedBox(
                   child: CircularProgressIndicator(
-                    color: Colors.blue,
+                    color: AppTheme.primaryColor,
                   )
               ),
               Text(status, style: const TextStyle(fontSize: 15),),

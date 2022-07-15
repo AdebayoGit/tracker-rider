@@ -90,7 +90,7 @@ class TripController extends GetxController {
       Get.back();
       Get.showSnackbar(GetSnackBar(
         title: failure.code,
-        message: failure.errorResponse.toString(),
+        message: failure.response.toString(),
         duration: const Duration(seconds: 2),
       ));
       return;
@@ -129,7 +129,7 @@ class TripController extends GetxController {
       Get.back();
       Get.showSnackbar(GetSnackBar(
         title: failure.code,
-        message: failure.errorResponse.toString(),
+        message: failure.response.toString(),
         duration: const Duration(seconds: 2),
       ));
       return;
@@ -154,7 +154,7 @@ class TripController extends GetxController {
       Get.back();
       Get.showSnackbar(GetSnackBar(
         title: failure.code,
-        message: failure.errorResponse.toString(),
+        message: failure.response.toString(),
         duration: const Duration(seconds: 2),
       ));
       return;

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rider/controllers/driver_controller.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../models/drawerItem.dart';
@@ -25,9 +26,12 @@ class CustomDrawer extends StatefulWidget {
 
 class CustomDrawerState extends State<CustomDrawer> {
   late List<DrawerItem> drawerItems;
+  late DriverController _controller;
+
   @override
   void initState() {
     drawerItems = setDrawerItemArray();
+    _controller = Get.find<DriverController>();
     super.initState();
   }
 
@@ -66,7 +70,7 @@ class CustomDrawerState extends State<CustomDrawer> {
                             child: CachedNetworkImage(
                               //width: size.width * 0.35,
                               color: AppTheme.primaryColor,
-                              imageUrl: 'https://bit.ly/3rFRhWH',
+                              imageUrl: _controller.driversPhotoUrl,
                               // Display when there is an error such as 404, 500 etc.
                               errorWidget: (context, url, error) =>
                                   const Icon(Icons.error),
@@ -104,12 +108,12 @@ class CustomDrawerState extends State<CustomDrawer> {
                       },
                     ),
                   ),
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.only(top: 15),
+                      padding: const EdgeInsets.only(top: 15),
                       child: Text(
-                        'Hi ',
-                        style: TextStyle(
+                        'Hi ${_controller.driversUsername}',
+                        style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: AppTheme.grey,
                           fontSize: 18,
@@ -184,7 +188,7 @@ class CustomDrawerState extends State<CustomDrawer> {
         splashColor: Colors.grey.withOpacity(0.1),
         highlightColor: Colors.transparent,
         onTap: () {
-          navigationtoScreen(listData.index);
+          navigationToScreen(listData.index);
         },
         child: Stack(
           children: <Widget>[
@@ -278,7 +282,7 @@ class CustomDrawerState extends State<CustomDrawer> {
     );
   }
 
-  Future<void> navigationtoScreen(DrawerIndex indexScreen) async {
+  Future<void> navigationToScreen(DrawerIndex indexScreen) async {
     widget.callBackIndex(indexScreen);
   }
 }

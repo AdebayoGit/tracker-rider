@@ -41,7 +41,7 @@ class DeviceServices {
     prefs.remove(_firstRunSettingsKey);
   }
 
-  Future<Object> addDriverToDevice(String username) async {
+  Future<Status> addDriverToDevice(String username) async {
     final SharedPreferences prefs = await _prefs;
     final String currentTime = DateTime.now().toString();
     try {
@@ -52,7 +52,7 @@ class DeviceServices {
       prefs.setStringList(_driversList, drivers);
       return Success(response: "Completed Successfully");
     } on Exception {
-      return Failure(code: "Error", errorResponse: "Failed to complete");
+      return Failure(code: "Error", response: "Failed to complete");
     }
   }
 
@@ -79,7 +79,7 @@ class DeviceServices {
     }
   }
 
-  Future<Object> registerVehicle(String model, int year, String numberPlates, String vehicleId) async {
+  Future<Status> registerVehicle(String model, int year, String numberPlates, String vehicleId) async {
     final SharedPreferences prefs = await _prefs;
     final String currentTime = DateTime.now().toString();
     try {
@@ -91,7 +91,7 @@ class DeviceServices {
       prefs.setBool('registered', true);
       return Success(response: "Completed Successfully");
     } on Exception {
-      return Failure(code: "Error", errorResponse: "Failed to complete");
+      return Failure(code: "Error", response: "Failed to complete");
     }
   }
 

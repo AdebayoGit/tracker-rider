@@ -13,7 +13,7 @@ class CameraServices {
 
   CameraServices(this.controller);
 
-  Future<Object> onNewCameraSelected() async {
+  Future<Status> onNewCameraSelected() async {
     try {
       List<CameraDescription> cameras = await availableCameras();
 
@@ -31,7 +31,7 @@ class CameraServices {
       await cameraController.initialize();
       return Success(response: "Camera Initialized");
     } on CameraException catch (e) {
-      return Failure(code: e.code, errorResponse: e.description as String);
+      return Failure(code: e.code, response: e.description as String);
     }
   }
 

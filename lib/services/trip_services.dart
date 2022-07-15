@@ -27,21 +27,21 @@ class TripServices {
     } on HttpException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on SocketException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on FormatException {
       return Failure(
-          code: AppConstants.invalidFormat, errorResponse: 'Invalid Format');
+          code: AppConstants.invalidFormat, response: 'Invalid Format');
     } catch (e) {
       return Failure(
-          code: AppConstants.unknownError, errorResponse: 'Unknown Error');
+          code: AppConstants.unknownError, response: 'Unknown Error');
     }
   }
 
-  Future<Failure?> pauseTrip(String id, String? remark, LocationData locationData) async {
+  Future<Status?> pauseTrip(String id, String? remark, LocationData locationData) async {
     try {
       _trips.doc(id).get().then((DocumentSnapshot doc) {
         List<dynamic> pauses = doc['pauses'];
@@ -57,21 +57,21 @@ class TripServices {
     } on HttpException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on SocketException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on FormatException {
       return Failure(
-          code: AppConstants.invalidFormat, errorResponse: 'Invalid Format');
+          code: AppConstants.invalidFormat, response: 'Invalid Format');
     } catch (e) {
       return Failure(
-          code: AppConstants.unknownError, errorResponse: 'Unknown Error');
+          code: AppConstants.unknownError, response: 'Unknown Error');
     }
   }
 
-  Object? stopTrip(String tripId, LocationData locationData) {
+  Status? stopTrip(String tripId, LocationData locationData) {
     try {
       _trips.doc(tripId).set({
         'stop': createLocationInfo(location: locationData),
@@ -81,38 +81,38 @@ class TripServices {
     } on HttpException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on SocketException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on FormatException {
       return Failure(
-          code: AppConstants.invalidFormat, errorResponse: 'Invalid Format');
+          code: AppConstants.invalidFormat, response: 'Invalid Format');
     } catch (e) {
       return Failure(
-          code: AppConstants.unknownError, errorResponse: 'Unknown Error');
+          code: AppConstants.unknownError, response: 'Unknown Error');
     }
   }
 
-  Future<Object?> addLocation(String tripId, Map<String, dynamic> location) async {
+  Future<Object> addLocation(String tripId, Map<String, dynamic> location) async {
     try {
       _trips.doc(tripId).collection('locations').add(location);
       return location;
     } on HttpException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on SocketException {
       return Failure(
           code: AppConstants.noInternet,
-          errorResponse: 'No Internet Connection');
+          response: 'No Internet Connection');
     } on FormatException {
       return Failure(
-          code: AppConstants.invalidFormat, errorResponse: 'Invalid Format');
+          code: AppConstants.invalidFormat, response: 'Invalid Format');
     } catch (e) {
       return Failure(
-          code: AppConstants.unknownError, errorResponse: 'Unknown Error');
+          code: AppConstants.unknownError, response: 'Unknown Error');
     }
   }
 
