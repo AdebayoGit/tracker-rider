@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:rider/utils/app_theme.dart';
 
 import 'package:rider/utils/trip_constants.dart';
 

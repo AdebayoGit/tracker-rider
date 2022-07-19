@@ -18,10 +18,12 @@ class DriverController extends GetxController {
 
   String? get driversUsername => _driver.username;
 
+  String? get driversLastTrip => _driver.lastTrip;
+
   String get driversPhotoUrl => _driver.photoUrl;
 
-  Future<void> getCurrentDriver(String uid) async {
-    Object? response = await _services.getCurrentDriver(uid);
+  Future<void> getCurrentDriver() async {
+    Object? response = await _services.getCurrentDriver();
     if (response is Success) {
       _driver = response.response as Driver;
     } else if (response is Failure) {

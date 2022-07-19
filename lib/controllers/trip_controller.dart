@@ -15,13 +15,15 @@ import '../models/status.dart';
 class TripController extends GetxController {
   final Stopwatch _stopwatch = Stopwatch();
 
-  late final RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
+  final RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
 
   static const MarkerId truckMarkerId = MarkerId('Truck Marker');
 
   BitmapDescriptor? truckIcon;
 
   final LocationServices _location = LocationServices();
+
+  late LocationData _currentLocation;
 
   final TripServices _trips = TripServices();
 
@@ -45,7 +47,6 @@ class TripController extends GetxController {
 
   @override
   void onInit() async {
-    // TODO: implement onInit
     super.onInit();
     createMarker();
     checkLeftOverTrip();
@@ -75,8 +76,7 @@ class TripController extends GetxController {
     Get.back();
     showPleaseWaitDialog();
     await _location.checkLocationPermission();
-    Object response = await _trips.createTrip(
-        await _location.getCurrentLocation(), remarks.text);
+    Object response = await _trips.createTrip(_currentLocation, remarks.text);
     if (response is Success) {
       remarks.clear();
       _tripId = response.response as String;
@@ -121,8 +121,7 @@ class TripController extends GetxController {
   Future<void> pauseTrip() async {
     Get.back();
     showPleaseWaitDialog();
-    Object response = _trips.pauseTrip(
-        _tripId, remarks.text, await _location.getCurrentLocation());
+    Object response = _trips.pauseTrip(_tripId, remarks.text, _currentLocation);
     remarks.clear();
     if (response is Failure) {
       Failure failure = response;
@@ -146,8 +145,7 @@ class TripController extends GetxController {
   Future<void> stopTrip() async {
     //Get.back();
     showPleaseWaitDialog();
-    Object? response =
-        _trips.stopTrip(_tripId, await _location.getCurrentLocation());
+    Object? response = _trips.stopTrip(_tripId, _currentLocation);
     remarks.clear();
     if (response != null) {
       Failure failure = response as Failure;
@@ -170,11 +168,12 @@ class TripController extends GetxController {
 
   Future<void> getInitialLocation(GoogleMapController controller) async {
     mapController = controller;
-    LocationData locationData = await _location.getCurrentLocation();
 
-    _updateMarker(locationData, truckMarkerId);
+    _currentLocation = await _location.getCurrentLocation();
 
-    await moveMap(locationData);
+    _updateMarker(_currentLocation, truckMarkerId);
+
+    await moveMap(_currentLocation);
   }
 
   Future<void> moveMap(LocationData locationData) async {
@@ -224,8 +223,8 @@ class TripController extends GetxController {
     _location
         .listenForLocationUpdates()
         .listen((LocationData locationData) async {
-      Map<String, dynamic> locationInfo =
-          _trips.createLocationInfo(location: locationData);
+      Map<String, dynamic> locationInfo = _trips.createLocationInfo(location: locationData);
+      _currentLocation = locationData;
       _trips.addLocation(_tripId, locationInfo);
       _updateMarker(locationData, truckMarkerId);
       await moveMap(locationData);

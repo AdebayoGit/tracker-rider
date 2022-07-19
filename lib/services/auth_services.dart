@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:rider/models/status.dart';
@@ -22,6 +21,7 @@ class AuthServices {
 
   }
 
+  String get driversId => _auth.currentUser!.uid;
 
   Future<Status> createToken(String username, String password) async {
     try {

@@ -57,7 +57,7 @@ class CustomNavigatorState extends State<CustomNavigator> {
           screenView = HomeView();
           color = AppTheme.nearlyBlack;
         });
-      } else if (drawerIndex == DrawerIndex.riders){
+      } /*else if (drawerIndex == DrawerIndex.riders){
         setState(() {
           screenView = Container();
           color = AppTheme.nearlyBlack;
@@ -77,7 +77,7 @@ class CustomNavigatorState extends State<CustomNavigator> {
           screenView = Container();
           color = AppTheme.nearlyBlack;
         });
-      } else {
+      }*/ else {
         //do in your way......
       }
     }

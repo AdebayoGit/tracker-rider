@@ -7,7 +7,6 @@ import '../../controllers/auth_controller.dart';
 import '../../models/drawerItem.dart';
 import '../../utils/app_theme.dart';
 
-
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer(
       {Key? key,

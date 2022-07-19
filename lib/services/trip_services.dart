@@ -1,19 +1,30 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'package:location/location.dart';
+import 'package:rider/controllers/driver_controller.dart';
 
 import '../models/status.dart';
 import '../utils/app_constants.dart';
+import 'auth_services.dart';
+import 'driver_services.dart';
 
 class TripServices {
 
-  final FirebaseFirestore _store = FirebaseFirestore.instance;
+  late final FirebaseFirestore _store ;
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final CollectionReference _trips;
 
-  late final CollectionReference _trips = _store.collection('riders/${_auth.currentUser?.uid}/trips');
+  late final DriverServices _driverServices;
+
+  TripServices(){
+    _store = FirebaseFirestore.instance;
+
+    _driverServices = DriverServices();
+
+    _trips = _store.collection('riders/${AuthServices().driversId}/trips');
+  }
 
   Future<Object> createTrip(LocationData locationData, [String? remark]) async {
     try {
@@ -21,9 +32,13 @@ class TripServices {
         'createdAt': DateTime.fromMillisecondsSinceEpoch(locationData.time!.toInt()).toString(),
         'start': createLocationInfo(location: locationData),
         'stop': null,
+        'status': 'in progress',
         'pauses': [],
         'initial remarks': remark,
-      }).then((value) => Success(response: value.id));
+      }).then((value){
+        _driverServices.recordDriverLastTrip(value.id);
+        return Success(response: value.id);
+      });
     } on HttpException {
       return Failure(
           code: AppConstants.noInternet,
@@ -43,16 +58,16 @@ class TripServices {
 
   Future<Status?> pauseTrip(String id, String? remark, LocationData locationData) async {
     try {
-      _trips.doc(id).get().then((DocumentSnapshot doc) {
-        List<dynamic> pauses = doc['pauses'];
-        pauses.add({
-          'location': createLocationInfo(location: locationData),
+      printInfo(info: "Herrrrrreeeeeeeeee number 1");
+      Map<String, dynamic> location = createLocationInfo(location: locationData);
+      await _trips.doc(id).update({
+        'status': 'paused',
+        'pauses': FieldValue.arrayUnion([{
+          'location': location,
           'remark': remark,
-        });
-        doc.reference.update({
-        'pauses': pauses,
-        });
+        }])
       });
+      printInfo(info: "Herrrrrreeeeeeeeee number 2");
       return null;
     } on HttpException {
       return Failure(
@@ -73,7 +88,8 @@ class TripServices {
 
   Status? stopTrip(String tripId, LocationData locationData) {
     try {
-      _trips.doc(tripId).set({
+      _trips.doc(tripId).update({
+        'status': 'completed',
         'stop': createLocationInfo(location: locationData),
         // 'final remarks': remark,
       });
@@ -117,15 +133,21 @@ class TripServices {
   }
 
   Future<String?> checkForUncompletedTrips() async {
-    QuerySnapshot snap = await _trips.orderBy('createdAt').limitToLast(1).get();
-    for (var i in snap.docs){
-      if (i['stop'] == null){
-        return i.id;
-      } else {
-        return null;
-      }
+    final DriverController controller = Get.find<DriverController>();
+
+    String? lastTripId = controller.driversLastTrip;
+
+    if(lastTripId == null){
+      return null;
+    } else {
+      return await _trips.doc(lastTripId).get().then((DocumentSnapshot doc){
+        if (doc['stop'] == null){
+          return doc.id;
+        } else {
+          return null;
+        }
+      });
     }
-    return null;
   }
 
   Map<String, dynamic> createLocationInfo({required LocationData location}) {

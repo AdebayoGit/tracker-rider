@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum DrawerIndex {home, records, about, help, riders}
+enum DrawerIndex {home, /*records, about, help, riders*/}
 
 class DrawerItem {
   DrawerItem({
@@ -18,7 +18,6 @@ class DrawerItem {
   DrawerIndex index;
 }
 
-
 List<DrawerItem> setDrawerItemArray() {
   return <DrawerItem>[
     DrawerItem(
@@ -26,7 +25,7 @@ List<DrawerItem> setDrawerItemArray() {
       labelName: 'Home',
       icon: const Icon(Icons.home_outlined),
     ),
-    DrawerItem(
+    /*DrawerItem(
       index: DrawerIndex.riders,
       labelName: 'Riders',
       icon: const Icon(Icons.sports_motorsports_outlined),
@@ -45,6 +44,6 @@ List<DrawerItem> setDrawerItemArray() {
       index: DrawerIndex.about,
       labelName: 'About',
       icon: const Icon(Icons.app_registration),
-    ),
+    ),*/
   ];
 }

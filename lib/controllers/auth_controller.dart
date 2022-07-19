@@ -75,7 +75,7 @@ class AuthController extends GetxController {
       _user = user;
       presence.updateUserPresence(user.uid);
       DriverController controller = Get.find<DriverController>();
-      await controller.getCurrentDriver(user.uid);
+      await controller.getCurrentDriver();
       Get.offAll(() => const CustomNavigator(),
         transition: Transition.fadeIn,
         duration: const Duration(seconds: 1),
