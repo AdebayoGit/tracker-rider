@@ -5,11 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_animarker/widgets/animarker.dart';
 
-import 'package:flutter_svg/svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
 
-import 'package:rider/controllers/auth_controller.dart';
 import 'package:rider/controllers/trip_controller.dart';
 import 'package:rider/views/home/components/text_components.dart';
 import 'package:rider/views/home/components/timer_components.dart';
@@ -20,10 +18,7 @@ import 'components/trip_control_components.dart';
 class HomeView extends GetResponsiveView<TripController> {
   HomeView({Key? key}) : super(key: key) {
     Get.lazyPut(() => TripController());
-    _auth = Get.put(AuthController());
   }
-
-  late final AuthController _auth;
 
   final Completer<GoogleMapController> _completer = Completer();
 
@@ -48,7 +43,8 @@ class HomeView extends GetResponsiveView<TripController> {
             return Animarker(
               curve: Curves.ease,
               mapId: _completer.future
-                  .then<int>((value) => value.mapId), //Grab Google Map Id
+                  .then<int>((value) => value.mapId,
+              ), //Grab Google Map Id
               markers: controller.markers.values.toSet(),
               rippleColor: AppTheme.primaryLightColor,
               child: GoogleMap(

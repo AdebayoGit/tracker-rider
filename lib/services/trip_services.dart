@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:location/location.dart';
-import 'package:rider/controllers/driver_controller.dart';
 
 import '../models/status.dart';
 import '../utils/app_constants.dart';
@@ -21,7 +20,7 @@ class TripServices {
   TripServices(){
     _store = FirebaseFirestore.instance;
 
-    _driverServices = DriverServices();
+    _driverServices = DriverServices.instance;
 
     _trips = _store.collection('riders/${AuthServices().driversId}/trips');
   }
@@ -133,11 +132,10 @@ class TripServices {
   }
 
   Future<String?> checkForUncompletedTrips() async {
-    final DriverController controller = Get.find<DriverController>();
 
-    String? lastTripId = controller.driversLastTrip;
+    String? lastTripId = _driverServices.driver!.lastTrip;
 
-    if(lastTripId == null){
+    if(lastTripId == ''){
       return null;
     } else {
       return await _trips.doc(lastTripId).get().then((DocumentSnapshot doc){

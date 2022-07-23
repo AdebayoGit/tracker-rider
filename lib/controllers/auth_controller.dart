@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:rider/components/progress_dialog.dart';
-import 'package:rider/controllers/driver_controller.dart';
 import 'package:rider/services/auth_services.dart';
 import 'package:rider/utils/app_theme.dart';
 import 'package:rider/views/auth_view.dart';
@@ -15,34 +14,32 @@ import '../helpers/response.dart';
 import '../models/driver.dart';
 import '../models/status.dart';
 
+import '../services/driver_services.dart';
 import '../views/custom_navigator.dart';
 
 class AuthController extends GetxController {
   late final AuthServices _services;
 
+  late final DriverServices _driverServices;
+
   late final Presence presence;
 
-  late User _user;
-
-  late Driver driver;
-
-  User? get user => _user;
+  late Driver? driver;
 
   @override
   void onInit() async {
     _services = AuthServices();
+    _driverServices = DriverServices.instance;
     presence = Presence.instance;
     _authMonitor();
     super.onInit();
   }
 
-  Future<dynamic> signIn(String username, String password) async {
+  Future<void> signIn(String username, String password) async {
     Get.dialog(const ProgressDialog(status: 'Please wait...'),
         barrierDismissible: false);
     var response = await _services.createToken(username, password);
-    if (response is Success) {
-      _user = response.response as User;
-    } else if (response is Failure) {
+    if (response is Failure) {
       ResponseHelpers.showSnackbar(response.response.toString());
     }
   }
@@ -54,8 +51,12 @@ class AuthController extends GetxController {
       SignOutDialog(
         yes: () async {
           Status status = await _services.signOut();
-          await presence.signedOut(_user.uid);
-          ResponseHelpers.showSnackbar(status.response.toString());
+          if(status is Success){
+            await presence.signedOut(driver!.username);
+            ResponseHelpers.showSnackbar(status.response.toString());
+          } else {
+            ResponseHelpers.showSnackbar('Unable to sign out');
+          }
         },
         no: () => Get.back(),
       ),
@@ -63,19 +64,17 @@ class AuthController extends GetxController {
     );
   }
 
-  Future<void> _authenticatedUserRoutine(User user) async {
-    bool online = await presence.checkForMultipleAuth(user.uid);
+  Future<void> _authenticatedUserRoutine(String userId) async {
+    bool online = await presence.checkForMultipleAuth(userId);
     if (online) {
-      signOut();
+      await _services.signOut();
       Get.showSnackbar(GetSnackBar(
           messageText: snacky(),
           duration: const Duration(seconds: 2),
-          backgroundColor: Colors.transparent));
+          backgroundColor: Colors.transparent),
+      );
     } else {
-      _user = user;
-      presence.updateUserPresence(user.uid);
-      DriverController controller = Get.find<DriverController>();
-      await controller.getCurrentDriver();
+      presence.updateUserPresence(userId);
       Get.offAll(() => const CustomNavigator(),
         transition: Transition.fadeIn,
         duration: const Duration(seconds: 1),
@@ -83,17 +82,28 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> _getDriverForAuthUser(String userId) async {
+    Status status = await _driverServices.getCurrentDriver(id: userId);
+    if (status is Success){
+      driver = status.response as Driver;
+      await _authenticatedUserRoutine(userId);
+    } else {
+      _services.signOut();
+      await presence.signedOut(userId);
+      ResponseHelpers.showSnackbar(status.response.toString());
+    }
+  }
+
   Future<void> _authMonitor() async {
     _services.authStream().listen((User? user) async {
-
       if (user == null) {
         Get.offAll(
-          () => const AuthView(),
+          () => AuthView(),
           transition: Transition.fadeIn,
           duration: const Duration(seconds: 1),
         );
       } else {
-        await _authenticatedUserRoutine(user);
+        await _getDriverForAuthUser(user.uid);
       }
     });
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../utils/app_theme.dart';
 
 class Button extends StatelessWidget {
   final String title;
@@ -17,7 +18,7 @@ class Button extends StatelessWidget {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
+      margin: const EdgeInsets.only(top: 10),
       width: size.width * 0.8,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(29),
@@ -49,17 +50,23 @@ class Button extends StatelessWidget {
 class AuthTextField extends StatelessWidget {
   final TextEditingController controller;
   final TextInputType textInputType;
+  final String label;
   final String hintText;
-  final validator;
+  final FocusNode? focusNode;
+  final String? Function(String?)? validator;
+  final void Function(String)? onSubmitted;
   final IconData icon;
 
 
   const AuthTextField({
     Key? key,
     required this.controller,
+    this.focusNode,
     required this.textInputType,
+    required this.label,
     required this.hintText,
     required this.validator,
+    this.onSubmitted,
     required this.icon,
   }) : super(key: key);
 
@@ -67,33 +74,45 @@ class AuthTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
         controller: controller,
+        focusNode: focusNode,
         validator: validator,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         keyboardType: textInputType,
         decoration: InputDecoration(
-          border: InputBorder.none,
-          icon: Icon(
+          prefixIcon: Icon(
             icon,
+            color: AppTheme.primaryLightColor,
+          ),
+          label: const Text(
+            'Username',
+            style: TextStyle(
+              color: AppTheme.primaryLightColor,
+            ),
           ),
           hintText: hintText,
-        )
+          focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: AppTheme.primaryLightColor)
+          ),
+        ),
+        onFieldSubmitted: onSubmitted,
     );
   }
 }
 
-
 class PassTextField extends StatefulWidget {
   final String?Function(String?)? validator;
+  final void Function(String)? onSubmitted;
   final TextEditingController controller;
   final FocusNode? focusNode;
-  final String field;
+  final String hint;
 
   const PassTextField({
     Key? key,
     required this.validator,
     required this.controller,
+    this.onSubmitted,
     this.focusNode,
-    required this.field,
+    required this.hint,
   }) : super(key: key);
 
   @override
@@ -117,23 +136,24 @@ class _PassTextFieldState extends State<PassTextField> {
             obscureText: _obscureText,
             validator: widget.validator,
             focusNode: widget.focusNode,
+            onFieldSubmitted: widget.onSubmitted,
             keyboardType: TextInputType.visiblePassword,
             decoration: InputDecoration(
-              prefixIcon: Icon(
+              prefixIcon: const Icon(
                 Icons.lock,
-                color: Colors.grey[900],
+                color: AppTheme.primaryLightColor,
               ),
-              hintText: widget.field,
+              hintText: widget.hint,
               suffixIcon: IconButton(
                 icon: Visibility(
                   visible: _obscureText,
-                  child: Icon(Icons.visibility, color: Colors.grey[900],),
-                  replacement: Icon(Icons.visibility_off, color: Colors.grey[900],),
+                  child: const Icon(Icons.visibility, color: AppTheme.primaryLightColor),
+                  replacement: const Icon(Icons.visibility_off, color: AppTheme.primaryLightColor),
                 ),
                 onPressed: _toggle,
               ),
-              focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey[900]!)
+              focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppTheme.primaryLightColor)
               ),
             ),
     );

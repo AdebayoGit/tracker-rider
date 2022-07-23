@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rider/controllers/driver_controller.dart';
 
 import '../../controllers/auth_controller.dart';
 import '../../models/drawerItem.dart';
@@ -25,12 +24,12 @@ class CustomDrawer extends StatefulWidget {
 
 class CustomDrawerState extends State<CustomDrawer> {
   late List<DrawerItem> drawerItems;
-  late DriverController _controller;
+  late AuthController _controller;
 
   @override
   void initState() {
     drawerItems = setDrawerItemArray();
-    _controller = Get.find<DriverController>();
+    _controller = Get.find<AuthController>();
     super.initState();
   }
 
@@ -69,7 +68,7 @@ class CustomDrawerState extends State<CustomDrawer> {
                             child: CachedNetworkImage(
                               //width: size.width * 0.35,
                               color: AppTheme.primaryColor,
-                              imageUrl: _controller.driversPhotoUrl,
+                              imageUrl: _controller.driver!.photoUrl,
                               // Display when there is an error such as 404, 500 etc.
                               errorWidget: (context, url, error) =>
                                   const Icon(Icons.error),
@@ -111,7 +110,7 @@ class CustomDrawerState extends State<CustomDrawer> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 15),
                       child: Text(
-                        'Hi ${_controller.driversUsername}',
+                        'Hi ${_controller.driver!.username}',
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: AppTheme.grey,
@@ -165,9 +164,7 @@ class CustomDrawerState extends State<CustomDrawer> {
                   color: Colors.red,
                 ),
                 onTap: () async {
-                  AuthController controller = Get.find();
-
-                  controller.signOut();
+                  _controller.signOut();
                 },
               ),
               SizedBox(

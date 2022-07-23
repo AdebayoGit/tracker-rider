@@ -2,30 +2,28 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/driver.dart';
 import '../models/status.dart';
-import 'auth_services.dart';
 
 class DriverServices {
   static DriverServices? _instance;
 
-  DriverServices._();
+  DriverServices._(){
+    _store = FirebaseFirestore.instance;
+
+    _drivers = _store.collection('riders');
+  }
 
   static DriverServices get instance => _instance ??= DriverServices._();
 
+  late Driver? driver;
+
   late FirebaseFirestore _store;
 
-  late DocumentReference _driversDoc;
+  late CollectionReference _drivers;
 
-  DriverServices(){
-    _store = FirebaseFirestore.instance;
-
-    _driversDoc = _store.collection('riders').doc(AuthServices().driversId);
-  }
-
-  Future<Status> getCurrentDriver() async {
+  Future<Status> getCurrentDriver({required String id}) async {
     try {
-      return _driversDoc.get().then((value) {
-        return Success(response: Driver.fromSnapshot(value));
-      });
+      driver = await _drivers.doc(id).get().then((value) => Driver.fromSnapshot(value));
+      return Success(response: driver!);
     } on Exception catch (e) {
       return Failure(code: "100", response: e as String);
     }
@@ -33,7 +31,7 @@ class DriverServices {
 
   Future<void> recordDriverLastTrip(String tripId) async {
     try {
-      return _driversDoc.update({
+      return driver?.ref.update({
         'lastTrip': tripId,
         'totalTrips': FieldValue.increment(1),
       });

@@ -9,6 +9,7 @@ class Driver {
   late final DateTime createdAt;
   late final String createdBy;
   late final CollectionReference trips;
+  late final DocumentReference ref;
 
   Driver({
     required this.username,
@@ -18,6 +19,7 @@ class Driver {
     required this.createdAt,
     required this.createdBy,
     required this.trips,
+    required this.ref,
   });
 
   factory Driver.fromSnapshot(DocumentSnapshot snapshot) {
@@ -33,6 +35,8 @@ class Driver {
       createdAt: snapshot['createdAt'].toDate(),
 
       createdBy: snapshot['createdBy'],
+
+      ref: snapshot.reference,
 
       trips: snapshot.reference.collection('trips'),
     );

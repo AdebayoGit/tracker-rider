@@ -2,6 +2,14 @@ class Status {
   String code;
   Object response;
   Status({required this.code, required this.response});
+
+  bool get isSuccess {
+    if (Status == Success) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
 
 class Success extends Status{

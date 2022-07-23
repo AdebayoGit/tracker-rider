@@ -1,13 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:rider/controllers/driver_controller.dart';
-import 'package:rider/controllers/location_controller.dart';
-import 'package:rider/helpers/presence.dart';
-import 'package:rider/services/device_services.dart';
-import 'package:rider/views/register_device_view.dart';
-import 'package:rider/views/splash_view.dart';
 
+import 'package:rider/views/splash_view.dart';
 import 'controllers/auth_controller.dart';
 
 Future<void> main() async {
@@ -30,7 +25,6 @@ class Passenger extends StatelessWidget {
         home: const SplashView(),
         onInit: () async {
           Get.put(AuthController());
-          Get.put(DriverController());
         });
   }
 }
