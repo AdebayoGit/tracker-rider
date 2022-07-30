@@ -32,7 +32,7 @@ class LocationServices{
       }
     }
     ///Todo: add distance filter
-    location.changeSettings(accuracy: LocationAccuracy.navigation, interval: 60000);
+    location.changeSettings(accuracy: LocationAccuracy.high, interval: 60000, distanceFilter: 50);
     location.enableBackgroundMode(enable: true);
   }
 

@@ -150,12 +150,11 @@ class TripServices {
 
   Map<String, dynamic> createLocationInfo({required LocationData location}) {
     return <String, dynamic>{
-      'location': GeoPoint(location.longitude!, location.latitude!),
+      'location': GeoPoint(location.latitude!, location.longitude!),
       'time': DateTime.fromMillisecondsSinceEpoch(location.time!.toInt()),
       'direction': location.heading,
       'speedInfo': {'speed': location.speed, 'accuracy': location.speedAccuracy},
       'altitude': location.altitude,
-
     };
   }
 }

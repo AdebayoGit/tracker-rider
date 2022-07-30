@@ -50,7 +50,6 @@ class Presence {
   }
 
   Future<bool> checkForMultipleAuth(String username) async{
-    final DatabaseReference ref = db.ref();
 
     final DataSnapshot snapshot = await ref.child(username).get();
 

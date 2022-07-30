@@ -11,6 +11,7 @@ import 'package:rider/views/auth_view.dart';
 import '../components/sign_out_dialog.dart';
 import '../helpers/presence.dart';
 import '../helpers/response.dart';
+import '../main.dart';
 import '../models/driver.dart';
 import '../models/status.dart';
 
@@ -54,6 +55,7 @@ class AuthController extends GetxController {
           if(status is Success){
             await presence.signedOut(driver!.username);
             ResponseHelpers.showSnackbar(status.response.toString());
+            RootWidget.restartApp(Get.context!);
           } else {
             ResponseHelpers.showSnackbar('Unable to sign out');
           }
@@ -73,6 +75,7 @@ class AuthController extends GetxController {
           duration: const Duration(seconds: 2),
           backgroundColor: Colors.transparent),
       );
+      RootWidget.restartApp(Get.context!);
     } else {
       presence.updateUserPresence(userId);
       Get.offAll(() => const CustomNavigator(),
@@ -91,6 +94,7 @@ class AuthController extends GetxController {
       _services.signOut();
       await presence.signedOut(userId);
       ResponseHelpers.showSnackbar(status.response.toString());
+      RootWidget.restartApp(Get.context!);
     }
   }
 
@@ -114,6 +118,6 @@ class AuthController extends GetxController {
           borderRadius: BorderRadius.circular(25.0),
           color: AppTheme.primaryColor,
         ),
-        child: const Text("User already logged in !!!"),
+        child: const Text("User already logged in !!!", style: TextStyle(color: AppTheme.nearlyWhite),),
       );
 }

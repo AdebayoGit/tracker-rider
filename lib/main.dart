@@ -9,7 +9,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
-    const Passenger(),
+    const RootWidget(child: Passenger()),
   );
 }
 
@@ -26,5 +26,36 @@ class Passenger extends StatelessWidget {
         onInit: () async {
           Get.put(AuthController());
         });
+  }
+}
+
+class RootWidget extends StatefulWidget {
+  const RootWidget({required this.child, Key? key}) : super(key: key);
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RootWidgetState>()?.restartApp();
+  }
+
+  @override
+  _RootWidgetState createState() => _RootWidgetState();
+}
+
+class _RootWidgetState extends State<RootWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
+    );
   }
 }

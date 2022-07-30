@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 import '../controllers/auth_controller.dart';
@@ -21,14 +20,10 @@ class SignOutDialog extends GetResponsiveView<AuthController> {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SvgPicture.asset(
-                "assets/icons/log_out.svg",
-                color: AppTheme.primaryColor,
-                width: 22,
-              ),
-              const SizedBox(width: 20),
-              const Expanded(child: Text('Sign Out')),
+            children: const [
+              Icon(Icons.logout_sharp, color: AppTheme.primaryColor),
+              SizedBox(width: 20),
+              Expanded(child: Text('Sign Out')),
             ],
           ),
           const Divider(
