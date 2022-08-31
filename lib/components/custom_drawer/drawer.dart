@@ -2,9 +2,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/auth_controller.dart';
 import '../../models/drawerItem.dart';
+import '../../services/driver_services.dart';
 import '../../utils/app_theme.dart';
+import '../sign_out_dialog.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer(
@@ -24,12 +25,12 @@ class CustomDrawer extends StatefulWidget {
 
 class CustomDrawerState extends State<CustomDrawer> {
   late List<DrawerItem> drawerItems;
-  late AuthController _controller;
+  late DriverServices _services;
 
   @override
   void initState() {
     drawerItems = setDrawerItemArray();
-    _controller = Get.find<AuthController>();
+    _services = Get.find<DriverServices>();
     super.initState();
   }
 
@@ -68,7 +69,7 @@ class CustomDrawerState extends State<CustomDrawer> {
                             child: CachedNetworkImage(
                               //width: size.width * 0.35,
                               color: AppTheme.primaryColor,
-                              imageUrl: _controller.driver!.photoUrl,
+                              imageUrl: _services.driver!.photoUrl,
                               // Display when there is an error such as 404, 500 etc.
                               errorWidget: (context, url, error) =>
                                   const Icon(Icons.error),
@@ -110,7 +111,7 @@ class CustomDrawerState extends State<CustomDrawer> {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 15),
                       child: Text(
-                        'Hi ${_controller.driver!.username}',
+                        'Hi ${_services.driver!.username}',
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: AppTheme.grey,
@@ -164,7 +165,13 @@ class CustomDrawerState extends State<CustomDrawer> {
                   color: Colors.red,
                 ),
                 onTap: () async {
-                  _controller.signOut();
+                  Get.dialog(
+                    SignOutDialog(
+                      yes: _services.signOut,
+                      no: () => Get.back(),
+                    ),
+                    barrierDismissible: false,
+                  );
                 },
               ),
               SizedBox(

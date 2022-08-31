@@ -1,9 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rider/services/driver_services.dart';
 
 import 'package:rider/views/splash_view.dart';
-import 'controllers/auth_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +24,7 @@ class Passenger extends StatelessWidget {
         ),
         home: const SplashView(),
         onInit: () async {
-          Get.put(AuthController());
+          await Get.putAsync<DriverServices>(() async => DriverServices());
         });
   }
 }

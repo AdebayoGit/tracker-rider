@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-import '../controllers/auth_controller.dart';
 import '../utils/app_theme.dart';
 
 
-class SignOutDialog extends GetResponsiveView<AuthController> {
-  SignOutDialog({required this.yes, required this.no, Key? key}) : super(key: key){
-    Get.lazyPut(() => AuthController());
-  }
+class SignOutDialog extends StatelessWidget {
+  const SignOutDialog({required this.yes, required this.no, Key? key}) : super(key: key);
 
   final VoidCallback yes;
   final VoidCallback no;

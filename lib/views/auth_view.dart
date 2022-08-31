@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:rider/components/auth_components.dart';
-import 'package:rider/controllers/auth_controller.dart';
+import '../services/driver_services.dart';
 import '../utils/validator.dart';
 
-class AuthView extends GetResponsiveView<AuthController> {
+class AuthView extends GetResponsiveView<DriverServices> {
   AuthView({Key? key}) : super(key: key);
 
   final TextEditingController _username = TextEditingController();
@@ -147,14 +147,14 @@ class AuthView extends GetResponsiveView<AuthController> {
                               hint: 'Password',
                               onSubmitted: (_) {
                                 FocusManager.instance.primaryFocus?.unfocus();
-                                controller.signIn(_username.text, _password.text);
+                                controller.signIn(_username.text.trim(), _password.text.trim());
                               },
                             ),
                             Button(
                               title: 'Sign In',
                               press: () {
                                 FocusManager.instance.primaryFocus?.unfocus();
-                                controller.signIn(_username.text, _password.text);
+                                controller.signIn(_username.text.trim(), _password.text.trim());
                               },
                               color: Colors.grey[600]!,
                             ),

@@ -6,7 +6,6 @@ import 'package:location/location.dart';
 
 import '../models/status.dart';
 import '../utils/app_constants.dart';
-import 'auth_services.dart';
 import 'driver_services.dart';
 
 class TripServices {
@@ -20,23 +19,26 @@ class TripServices {
   TripServices(){
     _store = FirebaseFirestore.instance;
 
-    _driverServices = DriverServices.instance;
+    _trips = _store.collection('trips');
 
-    _trips = _store.collection('riders/${AuthServices().driversId}/trips');
+    _driverServices = Get.find<DriverServices>();
   }
 
   Future<Object> createTrip(LocationData locationData, [String? remark]) async {
     try {
-      return await _trips.add({
+      String userId = _driverServices.user.uid;
+      String tripId = '$userId ${DateTime.now().millisecondsSinceEpoch}';
+      return await _trips.doc(tripId).set({
         'createdAt': DateTime.fromMillisecondsSinceEpoch(locationData.time!.toInt()).toString(),
+        'createdBy': userId,
         'start': createLocationInfo(location: locationData),
         'stop': null,
         'status': 'in progress',
         'pauses': [],
         'initial remarks': remark,
       }).then((value){
-        _driverServices.recordDriverLastTrip(value.id);
-        return Success(response: value.id);
+        _driverServices.recordDriverLastTrip(tripId);
+        return Success(response: tripId);
       });
     } on HttpException {
       return Failure(
@@ -57,7 +59,6 @@ class TripServices {
 
   Future<Status?> pauseTrip(String id, String? remark, LocationData locationData) async {
     try {
-      printInfo(info: "Herrrrrreeeeeeeeee number 1");
       Map<String, dynamic> location = createLocationInfo(location: locationData);
       await _trips.doc(id).update({
         'status': 'paused',
@@ -66,7 +67,6 @@ class TripServices {
           'remark': remark,
         }])
       });
-      printInfo(info: "Herrrrrreeeeeeeeee number 2");
       return null;
     } on HttpException {
       return Failure(
@@ -139,7 +139,7 @@ class TripServices {
       return null;
     } else {
       return await _trips.doc(lastTripId).get().then((DocumentSnapshot doc){
-        if (doc['stop'] == null){
+        if (doc['status'] != 'completed'){
           return doc.id;
         } else {
           return null;

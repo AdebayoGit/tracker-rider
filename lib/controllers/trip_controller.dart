@@ -10,6 +10,7 @@ import 'package:rider/components/progress_dialog.dart';
 import 'package:rider/services/location_services.dart';
 import 'package:rider/services/trip_services.dart';
 
+import '../main.dart';
 import '../models/status.dart';
 
 class TripController extends GetxController {
@@ -22,6 +23,8 @@ class TripController extends GetxController {
   BitmapDescriptor? truckIcon;
 
   final LocationServices _location = LocationServices();
+
+  late StreamSubscription<LocationData> _locationSub;
 
   late LocationData _currentLocation;
 
@@ -115,7 +118,7 @@ class TripController extends GetxController {
     tripUI(1);
     startTimer();
     _getLocationUpdates();
-    Get.back();
+    Get.back(closeOverlays: true);
   }
 
   Future<void> pauseTrip() async {
@@ -145,8 +148,10 @@ class TripController extends GetxController {
   Future<void> stopTrip() async {
     //Get.back();
     showPleaseWaitDialog();
+    _locationSub.cancel();
     Object? response = _trips.stopTrip(_tripId, _currentLocation);
     remarks.clear();
+    RootWidget.restartApp(Get.context!);
     if (response != null) {
       Failure failure = response as Failure;
       Get.back();
@@ -220,9 +225,8 @@ class TripController extends GetxController {
   }
 
   void _getLocationUpdates() {
-    _location
-        .listenForLocationUpdates()
-        .listen((LocationData locationData) async {
+    _locationSub = _location
+            .listenForLocationUpdates().listen((LocationData locationData) async {
       Map<String, dynamic> locationInfo = _trips.createLocationInfo(location: locationData);
       _currentLocation = locationData;
       _trips.addLocation(_tripId, locationInfo);
